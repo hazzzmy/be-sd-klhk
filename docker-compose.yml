@@ -1,0 +1,15 @@
+version: '3.11'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: app.dockerfile 
+    restart: always
+    hostname: app.be-sd-klhk
+    ports:
+      - "9999:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
