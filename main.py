@@ -92,7 +92,7 @@ async def handle_get_sd(parameter:Parameter):
 
         inputModel = pysd.load("./data/matra_bali_nusa_rev2.py")
 
-        model = inputModel.run(initial_condition=(parameter.initial_time,{}), final_time=parameter.final_time,cache_output=True)
+        model = inputModel.run(initial_condition=(parameter.initial_time,{}), final_time=parameter.final_time)
         
         if len(parameter.parameter) > 0:
             model = model[parameter.parameter]
