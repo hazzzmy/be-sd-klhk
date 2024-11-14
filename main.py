@@ -13,6 +13,10 @@ from pydantic import BaseModel, ValidationError
 import pysd
 import traceback
 import json
+import warnings
+warnings.filterwarnings("ignore")
+import os
+
 
 
 import uvicorn
@@ -74,22 +78,22 @@ class Parameter(BaseModel):
     initial_time: int = 2016
     final_time: int = 2055
     mps_assumption: float = 0.36
-    time_to_change_mps_assumption:int = 2055
+    time_to_change_mps_assumption:int = 3000
     laju_pertumbuhan_populasi_asumsi: float = 0.0116116
-    time_to_change_laju_pertumbuhan_populasi_asumsi: int = 2055
+    time_to_change_laju_pertumbuhan_populasi_asumsi: int = 3000
     laju_perubahan_lahan_terbangun_per_kapita_asumsi: float = 0.03
-    time_to_change_laju_perubahan_lahan_terbangun_per_kapita:int = 2055
+    time_to_change_laju_perubahan_lahan_terbangun_per_kapita:int = 3000
 
 
 
 @app.post('/postSystemDynamic', status_code=201)
 async def handle_get_sd(parameter:Parameter):
     try:
-        inputModel = pysd.load("./data/matra_bali_nusa_new.py")
 
-        print(parameter.parameter)
+        inputModel = pysd.load("./data/matra_bali_nusa_rev2.py")
 
         model = inputModel.run(initial_condition=(parameter.initial_time,{}), final_time=parameter.final_time,cache_output=True)
+        
         if len(parameter.parameter) > 0:
             model = model[parameter.parameter]
 
@@ -98,17 +102,16 @@ async def handle_get_sd(parameter:Parameter):
         model.insert(0, 'time', time_col)
         
         model_json = json.loads(model.to_json(orient="records"))
-        
         if parameter.simulation != 'baseline':
             inputModel.set_components({
-                'mps assumption': float(parameter.mps_assumption),
-                'time to change mps assumption': int(parameter.time_to_change_mps_assumption),
-                'laju pertumbuhan populasi asumsi': float(parameter.laju_pertumbuhan_populasi_asumsi),
-                'time to change laju pertumbuhan populasi asumsi': int(parameter.time_to_change_laju_pertumbuhan_populasi_asumsi),
-                'laju perubahan lahan terbangun per kapita asumsi': float(parameter.laju_perubahan_lahan_terbangun_per_kapita_asumsi),
-                'time to change laju perubahan lahan terbangun per kapita': int(parameter.time_to_change_laju_perubahan_lahan_terbangun_per_kapita)
+                'mps assumption': parameter.mps_assumption,
+                'time to change mps assumption': parameter.time_to_change_mps_assumption,
+                'laju pertumbuhan populasi asumsi': parameter.laju_pertumbuhan_populasi_asumsi,
+                'time to change laju pertumbuhan populasi asumsi': parameter.time_to_change_laju_pertumbuhan_populasi_asumsi,
+                'laju perubahan lahan terbangun per kapita asumsi': parameter.laju_perubahan_lahan_terbangun_per_kapita_asumsi,
+                'time to change laju perubahan lahan terbangun per kapita': parameter.time_to_change_laju_perubahan_lahan_terbangun_per_kapita
             })
-
+        
         sim_moodel = inputModel.run(initial_condition=(parameter.initial_time, {}), final_time=parameter.final_time,cache_output=True)
         
         if len(parameter.parameter) > 0:
