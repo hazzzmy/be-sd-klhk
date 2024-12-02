@@ -1,0 +1,570 @@
+FINAL TIME
+INITIAL TIME
+SAVEPER
+TIME STEP
+Kebutuhan lahan
+Kebutuhan lahan per orang
+Indeks D3T Air
+Indeks D3T Lahan
+Ambang Batas populasi Air
+Ambang Batas populasi dari Lahan
+"std kebutuhan air per kapita kebutuhan SK 146/2023"
+Kebutuhan air
+Tabungan
+Impact migrasi dari ekonomi
+Pertumbuhan populasi
+Switch Impact migrasi dari ekonomi
+Perubahan tk teknologi
+rasio tenaga kerja
+Elastisitas LPE thd perubahan teknologi
+Elastisitas LPE thd perubahan teknologi target
+perubahan Elastisitas LPE thd perubahan teknologi
+perubahan Elastisitas LPE thd perubahan teknologi delay
+time to change Elastisitas LPE thd perubahan teknologi
+delay on change Elastisitas LPE thd perubahan teknologi
+perubahan Laju Perubahan Lahan Terbangun per Kapita
+Perubahan Lahan Terbangun per Kapita
+delay on perubahan Laju Perubahan Lahan Terbangun per Kapita
+time to change Laju Perubahan Lahan Terbangun per Kapita
+Laju Perubahan Lahan Terbangun per Kapita historis and policy
+Laju Perubahan Lahan Terbangun per Kapita asumsi
+perubahan Laju Perubahan Lahan Terbangun per Kapita delay
+mps historical and policy
+delay on mps change assumption
+delay on perubahan laju pertumbuhan populasi
+laju pertumbuhan populasi asumsi
+perubahan laju pertumbuhan populasi
+perubahan laju pertumbuhan populasi delay
+mps assumption
+mps change
+time to change mps assumption
+time to change laju pertumbuhan populasi asumsi
+LPP historis dan policy
+mps change delay
+Biokapasitas Pangan
+persentase lahan utk biokapasitas pangan
+Fraksi lahan pangan dimanfaatkan
+Jejak ekologis tempat ginggal
+Biokapasitas tempat tinggal
+"Lahan built-up per kapita"
+Rasio Kecukupan lahan tempat tinggal
+Ambang Batas penduduk tempat tinggal
+Total kebutuhan air SK 146
+Total ketersediaan air
+aktivasi potensi air tanah
+koefisien I perkebunan
+koefisien I persawahan
+koefisien I pertanian lahan kering
+"faktor koreksi kebutuhan air per kap SK 146/2023"
+kebutuhan air pertanian SK 146
+"std kebutuhan air per perkebunan SK 146/2023 tahunan"
+kebutuhan air domestik SK 146
+Kebutuhan air ekonomi
+koefisien I pertanian lahan kering campur
+Rasio PDRB Per kapita to 2023
+power Impact migrasi dari ekonomi
+Rasio PDRB Per kapita
+Rasio PDRB Per kapita 2023
+PDRB Per kapita awal
+Ambang Batas Air
+Switch perubahan lahan per kapita
+Ambang Batas Penduduk Pangan
+Elasticity PDRB per kapita to unit lahan terbangun
+Lahan jasling kehati tinggi dan sangat tinggi
+"Hutan Primer & Sekunder jasling kehati tinggi dan sangat tinggi"
+fraksi jasling kehati tinggi dan sangat tinggi perkebunan
+fraksi jasling kehati tinggi dan sangat tinggi belukar padang rumput
+fraksi jasling kehati tinggi dan sangat tinggi hutan primer dan sekunder
+Perkebunan jasling kehati tinggi dan sangat tinggi
+Hutan tanaman jasling kehati tinggi dan sangat tinggi
+fraksi jasling kehati tinggi dan sangat tinggi hutan tanaman
+Rasio jasa lingkungan kehati tinggi dan sangat tinggi
+Belukar rumput jasling kehati tinggi dan sangat tinggi
+Lahan Lainnya ke Lahan Terbangun
+Belukar Padang Rumput to Lahan Terbangun
+Pertanian to Lahan Terbangun
+Perkebunan to Lahan Terbangun
+Hutan Mangrove to Lahan Terbangun
+"Rawa & Badan Air ke Lahan Terbangun"
+Lahan Terbangun per Kapita
+"Hutan Primer & Hutan Sekunder to Lahan Terbangun"
+Hutan Tanaman to Lahan Terbangun
+mult
+KLR Proxy
+laju perubahan KLR
+Tenaga Kerja
+Tk Pengangguran
+Tenaga kerja dari KLR
+Perubahan KLR Proxy
+Nilai Tambah Pertanian Hist
+Nilai Tambah Pertanian Init
+Tes
+Produktivitas Pertanian
+Total Peralihan ke Perkebunan
+Nilai Tambah Perkebunan Hist
+Nilai Tambah Perkebunan Init
+Pertanian to Lahan Terbangun Indicated
+Kebutuhan Lahan Pertanian
+Kebutuhan Lahan Terbangun
+Pertanian to Perkebunan Hist
+Lahan Terbangun to Perkebunan Hist
+Lahan Terbangun to Perkebunan Indicated
+Share Hutan Tanaman to Perkebunan
+Share Hutan Tanaman to Pertanian
+Lahan Terbangun to Pertanian Hist
+Lahan Terbangun to Pertanian Indicated
+Perubahan Nilai Tambah Pertanian
+Fraksi Perubahan Nilai Tambah Perkebunan
+Fraksi Perubahan Nilai Tambah Pertanian
+Share Perkebunan to Lahan Terbangun
+Gap Lahan Perkebunan
+Gap Lahan Pertanian
+Gap Lahan Terbangun
+Share Pertambangan ke Pertanian
+Produktivitas Perkebunan
+"Share Rawa & Badan Air ke Lahan Terbangun"
+"Share Rawa & Badan Air ke Perkebunan"
+"Share Rawa & Badan Air ke Pertanian"
+"Hutan Primer & Hutan Sekunder to Lahan Terbangun Hist"
+"Hutan Primer & Hutan Sekunder to Lahan Terbangun Indicated"
+Perkebunan to Pertanian Hist
+Pertambangan ke Lahan Terbangun Hist
+Pertambangan ke Lahan Terbangun Indicated
+Hutan Tanaman to Lahan Terbangun Hist
+Nilai Tambah Perkebunan
+Nilai Tambah Pertanian
+Hutan Tanaman to Perkebunan Indicated
+Belukar Padang Rumput to Lahan Terbangun Hist
+Belukar Padang Rumput to Lahan Terbangun Indicated
+Hutan Tanaman to Pertanian Hist
+Hutan Tanaman to Pertanian Indicated
+Belukar Padang Rumput to Perkebunan Hist
+Belukar Padang Rumput to Perkebunan Indicated
+Hutan Mangrove to Lahan Terbangun Hist
+Perkebunan to Pertanian Indicated
+Belukar Padang Rumput to Pertanian Hist
+Belukar Padang Rumput to Pertanian Indicated
+Peralihan Lahan Perkebunan Ydi
+Peralihan Lahan Pertanian Ydi
+Peralihan Lahan Terbangun Ydi
+"Rawa & Badan Air ke Perkebunan Indicated"
+Share Pertambangan ke Lahan Terbangun
+Share Pertambangan ke Perkebunan
+Share Pertanian to Lahan Terbangun
+Total Peralihan ke Lahan Terbangun
+"Rawa & Badan Air ke Pertanian Hist"
+"Rawa & Badan Air ke Pertanian Indicated"
+Total Peralihan ke Pertanian
+Lahan Lainnya ke Pertanian Hist
+Hutan Mangrove to Lahan Terbangun Indicated
+"Hutan Primer & Hutan Sekunder to Perkebunan Hist"
+"Hutan Primer & Hutan Sekunder to Perkebunan Indicated"
+Share Belukar Padang Rumput to Lahan Terbangun
+Share Belukar Padang Rumput to Perkebunan
+Share Belukar Padang Rumput to Pertanian
+Share Hutan Mangrove to Lahan Terbangun
+Kebutuhan Lahan Perkebunan
+Waktu Peralihan Lahan Terbangun
+Share Hutan Mangrove to Perkebunan
+"Share Hutan Primer & Hutan Sekunder to Perkebunan"
+Perkebunan to Lahan Terbangun Hist
+Perkebunan to Lahan Terbangun Indicated
+Share Hutan Tanaman to Lahan Terbangun
+"Hutan Primer & Hutan Sekunder to Pertanian Hist"
+"Share Hutan Primer & Hutan Sekunder to Pertanian"
+Lahan Lainnya ke Pertanian Indicated
+Laju Perubahan Lahan Terbangun per Kapita
+Share Lahan Lainnya ke Pertanian
+Share Lahan Terbangun to Perkebunan
+Share Lahan Terbangun to Pertanian
+Share Perkebunan to Pertanian
+Hutan Mangrove to Pertanian Indicated
+"Rawa & Badan Air ke Perkebunan Hist"
+Hutan Tanaman to Perkebunan Hist
+Share Pertanian to Perkebunan
+Pertambangan ke Pertanian Indicated
+Lahan Lainnya ke Lahan Terbangun Indicated
+"Rawa & Badan Air ke Lahan Terbangun Indicated"
+Pertanian to Perkebunan Indicated
+Pertambangan ke Perkebunan Indicated
+Lahan Lainnya ke Perkebunan Indicated
+Hutan Mangrove to Perkebunan Hist
+"Share Hutan Primer & Hutan Sekunder to Lahan Terbangun"
+Pertambangan ke Perkebunan Hist
+Lahan Lainnya ke Lahan Terbangun Hist
+Hutan Mangrove to Pertanian Hist
+Pertanian to Lahan Terbangun Hist
+Pertambangan ke Pertanian Hist
+Lahan Lainnya ke Perkebunan Hist
+Hutan Mangrove to Perkebunan Indicated
+Lahan Terbangun per Kapita Init
+Share Lahan Lainnya ke Perkebunan
+"Rawa & Badan Air ke Lahan Terbangun Hist"
+Waktu Peralihan Lahan Pertanian
+Hutan Tanaman to Lahan Terbangun Indicated
+Perubahan Nilai Tambah Perkebunan
+Waktu Peralihan Lahan Perkebunan
+Share Hutan Mangrove to Pertanian
+Share Lahan Lainnya ke Lahan Terbangun
+"Hutan Primer & Hutan Sekunder to Pertanian Indicated"
+Pertanian ke Lahan Lainnya
+Lahan Terbangun ke Lahan Lainnya
+Pertanian ke Pertambangan
+Lahan Terbangun ke Pertambangan
+"Pertanian ke Rawa & Badan Air"
+"Lahan Terbangun ke Rawa & Badan Air"
+"Pertambangan ke Hutan Primer & Sekunder"
+"Perkebunan ke Rawa & Badan Air"
+Lahan Terbangun to Belukar Padang Rumput
+Pertanian to Belukar Padang Rumput
+Lahan Terbangun to Hutan Mangrove
+Pertanian to Hutan Mangrove
+Perkebunan to Hutan Mangrove
+"Lahan Terbangun to Hutan Primer & Sekunder"
+Lahan Terbangun to Hutan Tanaman
+Pertanian to Hutan Tanaman
+Lahan Terbangun to Perkebunan
+Lahan Terbangun to Pertanian
+Pertanian to Perkebunan
+Belukar Padang Rumput ke Lahan Lainnya
+"Rawa & Badan Air ke Hutan Mangrove"
+Belukar Padang Rumput ke Pertambangan
+Perkebunan to Belukar Padang Rumput
+Lahan Lainnya ke Belukar Padang Rumput
+"Belukar Padang Rumput ke Rawa & Badan Air"
+Belukar Padang Rumput to Hutan Mangrove
+Perkebunan ke Lahan Lainnya
+Pertambangan ke Hutan Mangrove
+"Belukar Padang Rumput to Hutan Primer & Sekunder"
+Belukar Padang Rumput to Hutan Tanaman
+"Rawa & Badan Air ke Belukar Padang Rumput"
+"Rawa & Badan Air ke Pertambangan"
+Belukar Padang Rumput to Perkebunan
+"Rawa & Badan Air ke Hutan Primer & Sekunder"
+Belukar Padang Rumput to Pertanian
+"Rawa & Badan Air ke Hutan Tanaman"
+Pertambangan ke Perkebunan
+"Pertanian to Hutan Primer & Sekunder"
+Pertambangan ke Pertanian
+"Lahan Lainnya ke Rawa & Badan Air"
+Perkebunan ke Pertambangan
+"Rawa & Badan Air ke Perkebunan"
+"Pertambangan ke Rawa & Badan Air"
+Perkebunan to Pertanian
+"Rawa & Badan Air ke Pertanian"
+Pertambangan ke Lahan Lainnya
+Pertambangan ke Lahan Terbangun
+Hutan Tanaman to Hutan Mangrove
+"Rawa & Badan Air ke Lahan Lainnya"
+Pertambangan ke Belukar Padang Rumput
+"Perkebunan to Hutan Primer & Sekunder"
+Perkebunan to Hutan Tanaman
+"Lahan Lainnya ke Hutan Primer & Sekunder"
+Lahan Lainnya ke Hutan Tanaman
+Lahan Lainnya ke Pertanian
+Pertambangan ke Hutan Tanaman
+Lahan Lainnya ke Perkebunan
+Lahan Lainnya ke Pertambangan
+Lahan Lainnya ke Hutan Mangrove
+"Hutan Mangrove ke Rawa & Badan Air"
+Hutan Tanaman to Perkebunan
+Hutan Tanaman ke Pertambangan
+Hutan Tanaman to Pertanian
+"Hutan Mangrove to Hutan Primer & Sekunder"
+Hutan Mangrove to Hutan Tanaman
+Hutan Tanaman to Belukar Padang Rumput
+Hutan Mangrove ke Lahan Lainnya
+Hutan Mangrove to Perkebunan
+Hutan Mangrove ke Pertambangan
+Hutan Mangrove to Pertanian
+Hutan Tanaman ke Lahan Lainnya
+"Hutan Primer & Hutan Sekunder ke Lahan Lainnya"
+Hutan Mangrove to Belukar Padang Rumput
+"Hutan Primer & Hutan Sekunder to Belukar Padang Rumput"
+"Hutan Primer & Hutan Sekunder to Hutan Mangrove"
+"Hutan Tanaman ke Rawa & Badan Air"
+"Hutan Primer & Hutan Sekunder to Hutan Tanaman"
+"Hutan Primer & Hutan Sekunder to Perkebunan"
+"Hutan Tanaman to Hutan Primer & Sekunder"
+"Hutan Primer & Hutan Sekunderke Pertambangan"
+"Hutan Primer & Hutan Sekunder ke Rawa & Badan Air"
+"Hutan Primer & Hutan Sekunder to Pertanian"
+"Rawa & Badan Air HIst"
+"Rawa & Badan Air Init"
+Total Lahan
+Time Index
+Hutan Tanaman
+"Hutan Primer & Sekunder"
+Padang Rumput Minimum
+Availability Effect Hutan dan Belukar
+"Availability Effect Rawa & Badan Air"
+Availability Effect Lahan Lainnya
+Availability Effect Lahan Terbangun
+Availability Effect Belukar Padang Rumput
+Availability Effect Perkebunan
+Availability Effect Pertambangan
+Availability Effect Hutan Mangrove
+Availability Effect Hutan Tanaman
+Availability Effect Pertanian
+Pertambangan Minimum
+Hutan Mangrove
+Perkebunan
+Lahan Lainnya
+Perkebunan init
+Lahan Lainnya Init
+Perkebunan Minimum
+Perkebunan Ratio
+Hutan Tanaman init
+"Hutan Primer & Sekunder init"
+Pertambangan Init
+Hutan dan Belukar Minimum
+Hutan dan Belukar Ratio
+Lahan Terbangun Minimum
+Pertambangan Ratio
+Hutan Mangrove init
+Time Index 0
+"Hutan Lindung & Konservasi Minimum"
+"Hutan Lindung & Konservasi Ratio"
+"Rawa & Badan Air"
+Minimum Fraction Padang Rumput
+Minimum Fraction Pertambangan
+Minimum Fraction Pertanian Lahan Kering
+Minimum Fraction Tambak
+Belukar Padang Rumput
+Belukar Padang Rumput init
+Lahan Lainnya Minimum
+Lahan Lainnya Ratio
+Pertambangan
+Pertanian init
+Padang Rumput Ratio
+Pertanian Lahan Kering Minimum
+Pertanian Lahan Kering Ratio
+kebutuhan air perkebunan SK 146
+Minimum Fraction Hutan dan Belukar
+"Minimum Fraction Hutan Lindung & Konservasi"
+Pertanian
+Minimum Fraction Perkebunan
+Lahan Terbangun
+Time Unit
+Tambak Minimum
+Minimum Fraction Lahan Terbangun
+Lahan Terbangun Ratio
+Minimum Fraction Pertanian Lahan Basah
+Pertanian Lahan Basah Minimum
+Pertanian Lahan Basah Ratio
+Tambak Ratio
+Lahan Terbangun init
+Minimum Fraction Lahan Lainnya
+Belukar Padang Rumput Hist
+"Belukar Padang Rumput ke Rawa & Badan Air share"
+Belukar Padang Rumput ke Lahan Lainnya share
+Belukar Padang Rumput ke Pertambangan share
+"Belukar Padang Rumput to Hutan Primer & Sekunder share"
+Belukar Padang Rumput to Lahan Terbangun share
+Belukar Padang Rumput to Perkebunan share
+Belukar Padang Rumput to Hutan Mangrove share
+Belukar Padang Rumput to Hutan Tanaman share
+Belukar Padang Rumput to Pertanian share
+"Hutan Primer & Sekunder to Lahan Terbangun share"
+"Hutan Primer & Sekunder to Belukar Padang Rumput share"
+"Hutan Primer & Sekunder to Perkebunan share"
+"Hutan Primer & Sekunder to Hutan Mangrove share"
+"Hutan Primer & Sekunder to Hutan Tanaman share"
+"Hutan Primer & Sekunder to Pertanian share"
+"Rawa & Badan Air ke Hutan Primer & Sekunder share"
+"Rawa & Badan Air ke Lahan Terbangun share"
+"Rawa & Badan Air ke Belukar Padang Rumput share"
+Perkebunan Hist
+"Perkebunan ke Rawa & Badan Air share"
+Perkebunan ke Lahan Lainnya share
+Perkebunan ke Pertambangan share
+"Perkebunan to Hutan Primer & Sekunder share"
+Perkebunan to Lahan Terbangun share
+Perkebunan to Belukar Padang Rumput share
+Perkebunan to Hutan Mangrove share
+Perkebunan to Hutan Tanamang share
+Perkebunan to Pertanian share
+Pertambangan Hist
+"Pertambangan ke Hutan Primer & Sekunder share"
+"Pertambangan ke Rawa & Badan Air share"
+Pertambangan ke Lahan Lainnya share
+Pertambangan ke Lahan Terbangun share
+"Hutan Primer & Sekunder ke Rawa & Badan Air share"
+"Hutan Primer & Sekunder ke Pertambangan share"
+"Hutan Primer & Sekunder ke Lahan Lainnya share"
+Lahan Lainnya ke Pertanian share
+Pertanian to Hutan Tanaman share
+Pertambangan ke Pertanian share
+Lahan Terbangun Hist
+"Lahan Terbangun ke Rawa & Badan Air share"
+Lahan Terbangun ke Lahan Lainnya share
+Lahan Terbangun ke Pertambangan share
+"Rawa & Badan Air ke Perkebunan share"
+"Rawa & Badan Air ke Pertambangan share"
+"Rawa & Badan Air ke Hutan Mangrove share"
+"Rawa & Badan Air ke Hutan Tanaman share"
+"Rawa & Badan Air ke Pertanian share"
+"Rawa & Badan Air ke Lahan Lainnya share"
+"Hutan Primer & Sekunder Hist"
+Hutan Tanaman ke Pertambangan share
+"Hutan Tanaman to Hutan Primer & Sekunder share"
+Hutan Tanaman to Lahan Terbangun share
+Hutan Tanaman to Belukar Padang Rumput share
+Hutan Tanaman to Perkebunan share
+Hutan Tanaman to Hutan Mangrove share
+Hutan Tanaman to Pertanian share
+"Lahan Lainnya ke Rawa & Badan Air share"
+"Lahan Lainnya ke Hutan Primer & Sekunder share"
+Lahan Lainnya ke Lahan Terbangun share
+Lahan Lainnya ke Belukar Padang Rumput share
+Lahan Lainnya ke Perkebunan share
+Lahan Lainnya ke Pertambangan share
+Lahan Lainnya ke Hutan Mangrove share
+Lahan Lainnya ke Hutan Tanamang share
+Pertambangan ke Perkebunan share
+Pertambangan ke Hutan Mangrove share
+Pertambangan ke Hutan Tanaman share
+Pertanian to Hutan Mangrove share
+Lahan Terbangun to Perkebunan share
+Hutan Mangrove Hist
+"Hutan Mangrove ke Rawa & Badan Air share"
+Hutan Mangrove ke Lahan Lainnya share
+Hutan Mangrove ke Pertambangan share
+"Lahan Terbangun to Hutan Primer & Sekunder share"
+Lahan Terbangun to Belukar Padang Rumput share
+Pertanian to Perkebunan share
+Lahan Terbangun to Hutan Mangrove share
+Lahan Terbangun to Hutan Tanaman share
+Lahan Terbangun to Pertanian share
+Hutan Tanaman Hist
+"Hutan Tanaman ke Rawa & Badan Air share"
+Hutan Tanaman ke Lahan Lainnya share
+Pertanian Hist
+"Pertanian ke Rawa & Badan Air share"
+Pertanian ke Lahan Lainnya share
+Pertanian ke Pertambangan share
+Lahan Lainnya Hist
+Pertambangan ke Belukar Padang Rumput share
+Pertanian to Belukar Padang Rumput share
+"Hutan Mangrove to Hutan Primer & Sekunder share"
+Hutan Mangrove to Lahan Terbangun share
+Hutan Mangrove to Belukar Padang Rumput share
+"Pertanian to Hutan Primer & Sekunder share"
+Hutan Mangrove to Hutan Tanamang share
+Pertanian to Lahan Terbangun share
+Hutan Mangrove to Perkebunan share
+Hutan Mangrove to Pertanian share
+IKU Bali nusra
+IKU Bali nusra Historis
+Kebutuhan air populasi
+Angkatan Kerja
+Intensitas penanaman
+Rasio kecukupan air SK 146
+Rasio kecukupan pangan
+PDRB per kapita
+jumlah hari per musim tanam
+Perubahan IKU Bali
+Lahan Pangan per kapita
+Populasi Pulau
+Kebutuhan air per kapita
+konverter detik ke jam
+Rasio kecukupan air Falkenmark
+Elastisitas perubahan IKU Bali nusra
+Persentase air tercemar
+"debit per detik pertanian dasar SK 146/2023"
+Ketersediaan air per kapita
+konverter jam ke hari
+"std kebutuhan air per kapita SK 146/2023"
+Jejak ekologis pangan
+Laju PDRB Per kapita
+Supply air permukaan
+"std kebutuhan air per pertanian dasar SK 146/2023 tahunan"
+Potensi air tanah
+Waktu meratakan laju PDRB per kapita
+Total ketersediaan air bisa digunakan
+Air limbah industri ekonomi
+Air limbah rumah tangga
+fraksi air limbah industri ekonomi
+fraksi air limbah populasi
+Fraksi jaringan air
+dampak kualitas air ke industri ekonomi
+Baku mutu BOD
+BOD industri ekonomi
+BOD rumah tangga
+BOD total
+delay dampak air ke ekonomi
+dampak kecukupan air industri ekonomi
+Kandungan BOD rumah tangga
+rasio kecukupan air
+dampak kualitas air industri ekonomi delay
+PDRB Pulau
+kecukupan air industri dan ekonomi delay
+dampak kualitas air ke rumah tangga
+dampak kualitas air ke rumah tangga delay
+kecukupan air industri dan ekonomi
+konsentrasi BOD
+Suplai air jaringan
+Rasio konsentrasi BOD thd baku mutu
+Suplai air alamiahn
+Kandungan BOD air limbah industri ekonomi
+Alokasi air industri ekonomi
+Alokasi air populasi
+Angkatan Kerja Historis
+Asumsi KOR awal
+Capacity Utilization Factor
+dampak kecukupan air populasi
+delay dampak air
+Depresiasi
+Elastisitas LPE thd perubahan teknologi historis
+Farksi suplai air
+Gap Kapital
+hari dalam tahun
+Intensitas air untuk ekonomi
+Intensitas kapital
+Investasi
+Investasi dibutuhkan
+Investasi historis
+Investasi luar
+kapital
+Kapital awal
+Kapital dibutuhkan
+Kebutuhan air industri dan ekonomi
+Kecukupan air
+Kecukupan air delay
+Kecukupan air populasi
+KLR Historis
+KOR
+laju pertumbuhan populasi
+liter ke meter kubik
+LPE Pulau
+Lpe Provinsi historis
+"LPE Pulau Mula-mula"
+mps
+PDRB Pulau awal
+PDRB Pulau historis
+PDRB Pulau rerata
+pendapatan
+pendapatan untuk digunakan
+Pengangguran
+Pengangguran historis 2
+Perubahan PDRB Pulau rerata
+Perubahan PDRB Pulau target
+"Populasi historis+Projeksi"
+Potensi investasi
+r
+satu tahun unit
+Sensitivitas tk teknologi thd KLR
+Standard kebutuha air per kapita
+target LPE Pulau
+Target PDRB Pulau
+Tenaga kerja awal
+Tenaga Kerja historis
+Tingkat Teknologi
+Tk Pengangguran historis
+Total kebutuhan air
+TPAK berbasis populasi
+umur kapital rata2
+Waktu meratakan PDRB Pulau
+waktu meratakan pendapatan
+Waktu pemenuhan investasi
+Waktu Trend LPE Pulau

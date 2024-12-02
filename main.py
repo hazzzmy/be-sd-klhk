@@ -73,6 +73,7 @@ async def redoc_html():
 
 
 class Parameter(BaseModel):
+    island:str
     parameter:List[str]
     simulation:str = 'baseline'
     initial_time: int = 2016
@@ -83,16 +84,23 @@ class Parameter(BaseModel):
     time_to_change_laju_pertumbuhan_populasi_asumsi: int = 3000
     laju_perubahan_lahan_terbangun_per_kapita_asumsi: float = 0.03
     time_to_change_laju_perubahan_lahan_terbangun_per_kapita:int = 3000
-
-
+    elastisitas_lpe_thd_perubahan_teknologi_target: float = 0.35
+    time_to_change_elastisitas_lpe_thd_perubahan_teknologi : int = 3000
 
 @app.post('/postSystemDynamic', status_code=201)
 async def handle_get_sd(parameter:Parameter):
+
+    print(parameter.island)
+
     try:
 
-        inputModel = pysd.load("./data/matra_bali_nusa_rev2.py")
+        inputModel = pysd.load(f"./data/model_{parameter.island}.py")
 
         model = inputModel.run(initial_condition=(parameter.initial_time,{}), final_time=parameter.final_time)
+
+        with open("param.txt", "w") as file:
+            for item in model.columns:
+                file.write(f"{item}\n")
         
         if len(parameter.parameter) > 0:
             model = model[parameter.parameter]
@@ -109,7 +117,9 @@ async def handle_get_sd(parameter:Parameter):
                 'laju pertumbuhan populasi asumsi': parameter.laju_pertumbuhan_populasi_asumsi,
                 'time to change laju pertumbuhan populasi asumsi': parameter.time_to_change_laju_pertumbuhan_populasi_asumsi,
                 'laju perubahan lahan terbangun per kapita asumsi': parameter.laju_perubahan_lahan_terbangun_per_kapita_asumsi,
-                'time to change laju perubahan lahan terbangun per kapita': parameter.time_to_change_laju_perubahan_lahan_terbangun_per_kapita
+                'time to change laju perubahan lahan terbangun per kapita': parameter.time_to_change_laju_perubahan_lahan_terbangun_per_kapita,
+                'Elastisitas LPE thd perubahan teknologi target':parameter.elastisitas_lpe_thd_perubahan_teknologi_target,
+                'time to change Elastisitas LPE thd perubahan teknologi': parameter.time_to_change_elastisitas_lpe_thd_perubahan_teknologi
             })
         
         sim_moodel = inputModel.run(initial_condition=(parameter.initial_time, {}), final_time=parameter.final_time,cache_output=True)
@@ -124,6 +134,7 @@ async def handle_get_sd(parameter:Parameter):
         sim_moodel_json = json.loads(sim_moodel.to_json(orient="records"))
 
         return {
+            "island": parameter.island,
             "simulation": parameter.simulation,
             "baseline": model_json,
             "result": sim_moodel_json
