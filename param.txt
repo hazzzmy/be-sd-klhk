@@ -2,74 +2,68 @@ FINAL TIME
 INITIAL TIME
 SAVEPER
 TIME STEP
-Kebutuhan lahan
-Kebutuhan lahan per orang
-Indeks D3T Air
+Biokapasitas Pangan
+Fraksi lahan pangan dimanfaatkan
 Indeks D3T Lahan
+Indeks D3T Air
 Ambang Batas populasi Air
-Ambang Batas populasi dari Lahan
 "std kebutuhan air per kapita kebutuhan SK 146/2023"
 Kebutuhan air
-Tabungan
-Impact migrasi dari ekonomi
-Pertumbuhan populasi
-Switch Impact migrasi dari ekonomi
-Perubahan tk teknologi
-rasio tenaga kerja
-Elastisitas LPE thd perubahan teknologi
-Elastisitas LPE thd perubahan teknologi target
+Ambang Batas populasi dari Lahan
+Kebutuhan lahan
+Kebutuhan lahan per orang
+delay on change Elastisitas LPE thd perubahan teknologi
+Total kebutuhan air SK 146
+delay on perubahan Laju Perubahan Lahan Terbangun per Kapita
 perubahan Elastisitas LPE thd perubahan teknologi
 perubahan Elastisitas LPE thd perubahan teknologi delay
-time to change Elastisitas LPE thd perubahan teknologi
-delay on change Elastisitas LPE thd perubahan teknologi
-perubahan Laju Perubahan Lahan Terbangun per Kapita
+Elastisitas LPE thd perubahan teknologi
+Elastisitas LPE thd perubahan teknologi target
 Perubahan Lahan Terbangun per Kapita
-delay on perubahan Laju Perubahan Lahan Terbangun per Kapita
+time to change Elastisitas LPE thd perubahan teknologi
 time to change Laju Perubahan Lahan Terbangun per Kapita
-Laju Perubahan Lahan Terbangun per Kapita historis and policy
+perubahan Laju Perubahan Lahan Terbangun per Kapita
 Laju Perubahan Lahan Terbangun per Kapita asumsi
+Laju Perubahan Lahan Terbangun per Kapita historis and policy
 perubahan Laju Perubahan Lahan Terbangun per Kapita delay
+Total kebutuhan air berbasis ekonomi
 mps historical and policy
 delay on mps change assumption
 delay on perubahan laju pertumbuhan populasi
-laju pertumbuhan populasi asumsi
 perubahan laju pertumbuhan populasi
 perubahan laju pertumbuhan populasi delay
-mps assumption
-mps change
 time to change mps assumption
+mps assumption
+Pertumbuhan populasi
+mps change delay
+Tabungan
+laju pertumbuhan populasi asumsi
+mps change
 time to change laju pertumbuhan populasi asumsi
 LPP historis dan policy
-mps change delay
-Biokapasitas Pangan
-persentase lahan utk biokapasitas pangan
-Fraksi lahan pangan dimanfaatkan
-Jejak ekologis tempat ginggal
-Biokapasitas tempat tinggal
-"Lahan built-up per kapita"
-Rasio Kecukupan lahan tempat tinggal
-Ambang Batas penduduk tempat tinggal
-Total kebutuhan air SK 146
 Total ketersediaan air
 aktivasi potensi air tanah
-koefisien I perkebunan
-koefisien I persawahan
-koefisien I pertanian lahan kering
+jejak ekologis tempat tinggal
+Koefisien I pertanian lahan kering
 "faktor koreksi kebutuhan air per kap SK 146/2023"
-kebutuhan air pertanian SK 146
+Rasio Kecukupan lahan tempat tinggal
+Ambang Batas penduduk tempat tinggal
+Koefisien I perkebunan
 "std kebutuhan air per perkebunan SK 146/2023 tahunan"
+"Lahan Built-up per kapita"
+Koefisien I persawahan
 kebutuhan air domestik SK 146
-Kebutuhan air ekonomi
-koefisien I pertanian lahan kering campur
-Rasio PDRB Per kapita to 2023
-power Impact migrasi dari ekonomi
-Rasio PDRB Per kapita
-Rasio PDRB Per kapita 2023
-PDRB Per kapita awal
-Ambang Batas Air
-Switch perubahan lahan per kapita
+Koefisien I pertanian lahan kering campur
+kebutuhan air pertanian SK 146
+Biokapasitas tempat tinggal
+"std kebutuhan air per pertanian SK 146/2023 tahunan"
+Ambang Batas Penduduk Air
+Kebutuhan Lahan Terbangun
+PDRB Pulau
 Ambang Batas Penduduk Pangan
-Elasticity PDRB per kapita to unit lahan terbangun
+Lahan Terbangun per Kapita
+Laju Perubahan Lahan Terbangun per Kapita
+Populasi Papua Hist
 Lahan jasling kehati tinggi dan sangat tinggi
 "Hutan Primer & Sekunder jasling kehati tinggi dan sangat tinggi"
 fraksi jasling kehati tinggi dan sangat tinggi perkebunan
@@ -86,7 +80,6 @@ Pertanian to Lahan Terbangun
 Perkebunan to Lahan Terbangun
 Hutan Mangrove to Lahan Terbangun
 "Rawa & Badan Air ke Lahan Terbangun"
-Lahan Terbangun per Kapita
 "Hutan Primer & Hutan Sekunder to Lahan Terbangun"
 Hutan Tanaman to Lahan Terbangun
 mult
@@ -105,7 +98,6 @@ Nilai Tambah Perkebunan Hist
 Nilai Tambah Perkebunan Init
 Pertanian to Lahan Terbangun Indicated
 Kebutuhan Lahan Pertanian
-Kebutuhan Lahan Terbangun
 Pertanian to Perkebunan Hist
 Lahan Terbangun to Perkebunan Hist
 Lahan Terbangun to Perkebunan Indicated
@@ -173,7 +165,6 @@ Share Hutan Tanaman to Lahan Terbangun
 "Hutan Primer & Hutan Sekunder to Pertanian Hist"
 "Share Hutan Primer & Hutan Sekunder to Pertanian"
 Lahan Lainnya ke Pertanian Indicated
-Laju Perubahan Lahan Terbangun per Kapita
 Share Lahan Lainnya ke Pertanian
 Share Lahan Terbangun to Perkebunan
 Share Lahan Terbangun to Pertanian
@@ -454,8 +445,8 @@ Hutan Mangrove to Hutan Tanamang share
 Pertanian to Lahan Terbangun share
 Hutan Mangrove to Perkebunan share
 Hutan Mangrove to Pertanian share
-IKU Bali nusra
-IKU Bali nusra Historis
+IKU Bali
+IKU Bali Historis
 Kebutuhan air populasi
 Angkatan Kerja
 Intensitas penanaman
@@ -469,12 +460,13 @@ Populasi Pulau
 Kebutuhan air per kapita
 konverter detik ke jam
 Rasio kecukupan air Falkenmark
-Elastisitas perubahan IKU Bali nusra
+Elastisitas perubahan IKU Bali
 Persentase air tercemar
-"debit per detik pertanian dasar SK 146/2023"
+"std kebutuhan air per pertanian SK 146/2023"
 Ketersediaan air per kapita
 konverter jam ke hari
 "std kebutuhan air per kapita SK 146/2023"
+rasio air padi perkebunan
 Jejak ekologis pangan
 Laju PDRB Per kapita
 Supply air permukaan
@@ -497,7 +489,6 @@ dampak kecukupan air industri ekonomi
 Kandungan BOD rumah tangga
 rasio kecukupan air
 dampak kualitas air industri ekonomi delay
-PDRB Pulau
 kecukupan air industri dan ekonomi delay
 dampak kualitas air ke rumah tangga
 dampak kualitas air ke rumah tangga delay
@@ -538,25 +529,26 @@ laju pertumbuhan populasi
 liter ke meter kubik
 LPE Pulau
 Lpe Provinsi historis
-"LPE Pulau Mula-mula"
+"LPE provinsi Mula-mula"
 mps
-PDRB Pulau awal
-PDRB Pulau historis
-PDRB Pulau rerata
+PDRB Provinsi awal
+PDRB Provinsi historis
+PDRB Provinsi rerata
 pendapatan
 pendapatan untuk digunakan
 Pengangguran
 Pengangguran historis 2
-Perubahan PDRB Pulau rerata
-Perubahan PDRB Pulau target
+Perubahan PDRB Provinsi rerata
+Perubahan PDRB Provinsi target
+Perubahan tk teknologi
 "Populasi historis+Projeksi"
 Potensi investasi
 r
 satu tahun unit
 Sensitivitas tk teknologi thd KLR
 Standard kebutuha air per kapita
-target LPE Pulau
-Target PDRB Pulau
+target LPE Provinsi
+Target PDRB Provinsi
 Tenaga kerja awal
 Tenaga Kerja historis
 Tingkat Teknologi
@@ -564,7 +556,7 @@ Tk Pengangguran historis
 Total kebutuhan air
 TPAK berbasis populasi
 umur kapital rata2
-Waktu meratakan PDRB Pulau
+Waktu meratakan PDRB provinsi
 waktu meratakan pendapatan
 Waktu pemenuhan investasi
-Waktu Trend LPE Pulau
+Waktu Trend LPE Provinsi
