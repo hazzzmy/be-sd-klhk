@@ -90,11 +90,9 @@ class Parameter(BaseModel):
 @app.post('/postSystemDynamic', status_code=201)
 async def handle_get_sd(parameter:Parameter):
 
-    print(parameter.island)
-
     try:
 
-        inputModel = pysd.load(f"./data/model_{parameter.island}.py")
+        inputModel = pysd.load(f"./data/production/model_{parameter.island}.py")
 
         model = inputModel.run(initial_condition=(parameter.initial_time,{}), final_time=parameter.final_time)
 
