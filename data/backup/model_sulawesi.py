@@ -1,13 +1,13 @@
 """
-Python model 'model_papua.py'
+Python model 'model_sulawesi.py'
 Translated using PySD
 """
 
 from pathlib import Path
 import numpy as np
 
-from pysd.py_backend.functions import step, not_implemented_function
-from pysd.py_backend.statefuls import Delay, Trend, Integ, Smooth, Initial
+from pysd.py_backend.functions import step
+from pysd.py_backend.statefuls import Delay, Integ, Trend, Smooth, Initial
 from pysd.py_backend.lookups import HardcodedLookups
 from pysd import Component
 
@@ -99,325 +99,13 @@ def time_step():
 
 
 @component.add(
-    name="Biokapasitas Pangan",
-    units="Ha",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "total_lahan": 1,
-        "pertambangan": 1,
-        "lahan_terbangun": 1,
-        "lahan_lainnya": 1,
-        "fraksi_lahan_pangan_dimanfaatkan": 1,
-    },
-)
-def biokapasitas_pangan():
-    return (
-        total_lahan() - pertambangan() - lahan_terbangun() - lahan_lainnya()
-    ) * fraksi_lahan_pangan_dimanfaatkan()
-
-
-@component.add(
-    name="Fraksi lahan pangan dimanfaatkan",
-    units="Dmnl",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def fraksi_lahan_pangan_dimanfaatkan():
-    return 0.681572
-
-
-@component.add(
-    name="Indeks D3T Lahan",
-    units="1",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"biokapasitas_pangan": 1, "kebutuhan_lahan": 1},
-)
-def indeks_d3t_lahan():
-    return biokapasitas_pangan() / kebutuhan_lahan()
-
-
-@component.add(
-    name="Indeks D3T Air",
-    units="1",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"rasio_kecukupan_air_sk_146": 1},
-)
-def indeks_d3t_air():
-    return 1 / rasio_kecukupan_air_sk_146()
-
-
-@component.add(
-    name="Ambang Batas populasi Air",
-    units="jiwa",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "total_ketersediaan_air_bisa_digunakan": 1,
-        "std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023": 1,
-    },
-)
-def ambang_batas_populasi_air():
-    return (
-        total_ketersediaan_air_bisa_digunakan()
-        / std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023()
-    )
-
-
-@component.add(
-    name='"std kebutuhan air per kapita kebutuhan SK 146/2023"',
-    units="m*m*m/(tahun*jiwa)",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023():
-    return 850
-
-
-@component.add(
-    name="Kebutuhan air",
-    units="m*m*m/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "populasi_pulau": 1,
-        "std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023": 1,
-    },
-)
-def kebutuhan_air():
-    return populasi_pulau() * std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023()
-
-
-@component.add(
-    name="Ambang Batas populasi dari Lahan",
-    units="jiwa",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"biokapasitas_pangan": 1, "kebutuhan_lahan_per_orang": 1},
-)
-def ambang_batas_populasi_dari_lahan():
-    return biokapasitas_pangan() / kebutuhan_lahan_per_orang()
-
-
-@component.add(
-    name="Kebutuhan lahan",
-    units="Ha",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"kebutuhan_lahan_per_orang": 1, "populasi_pulau": 1},
-)
-def kebutuhan_lahan():
-    return kebutuhan_lahan_per_orang() * populasi_pulau()
-
-
-@component.add(
-    name="Kebutuhan lahan per orang",
-    units="Ha/jiwa",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"lahan_pangan_per_kapita": 1, "lahan_builtup_per_kapita": 1},
-)
-def kebutuhan_lahan_per_orang():
-    return lahan_pangan_per_kapita() + lahan_builtup_per_kapita()
-
-
-@component.add(
-    name="delay on change Elastisitas LPE thd perubahan teknologi",
-    units="tahun",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def delay_on_change_elastisitas_lpe_thd_perubahan_teknologi():
-    return 7
-
-
-@component.add(
-    name="Total kebutuhan air SK 146",
-    units="m*m*m/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "kebutuhan_air_domestik_sk_146": 1,
-        "total_kebutuhan_air_berbasis_ekonomi": 1,
-    },
-)
-def total_kebutuhan_air_sk_146():
-    return kebutuhan_air_domestik_sk_146() + total_kebutuhan_air_berbasis_ekonomi()
-
-
-@component.add(
-    name="delay on perubahan Laju Perubahan Lahan Terbangun per Kapita",
-    units="tahun",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def delay_on_perubahan_laju_perubahan_lahan_terbangun_per_kapita():
-    return 5
-
-
-@component.add(
-    name="perubahan Elastisitas LPE thd perubahan teknologi",
-    units="1",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "elastisitas_lpe_thd_perubahan_teknologi_target": 1,
-        "elastisitas_lpe_thd_perubahan_teknologi_historis": 1,
-        "time_to_change_elastisitas_lpe_thd_perubahan_teknologi": 1,
-        "time": 1,
-    },
-)
-def perubahan_elastisitas_lpe_thd_perubahan_teknologi():
-    return step(
-        __data["time"],
-        elastisitas_lpe_thd_perubahan_teknologi_target()
-        - elastisitas_lpe_thd_perubahan_teknologi_historis(),
-        time_to_change_elastisitas_lpe_thd_perubahan_teknologi(),
-    )
-
-
-@component.add(
-    name="perubahan Elastisitas LPE thd perubahan teknologi delay",
-    units="1",
-    comp_type="Stateful",
-    comp_subtype="Delay",
-    depends_on={"_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay": 1},
-    other_deps={
-        "_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay": {
-            "initial": {"delay_on_change_elastisitas_lpe_thd_perubahan_teknologi": 1},
-            "step": {
-                "perubahan_elastisitas_lpe_thd_perubahan_teknologi": 1,
-                "delay_on_change_elastisitas_lpe_thd_perubahan_teknologi": 1,
-            },
-        }
-    },
-)
-def perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay():
-    return _delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay()
-
-
-_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay = Delay(
-    lambda: perubahan_elastisitas_lpe_thd_perubahan_teknologi(),
-    lambda: delay_on_change_elastisitas_lpe_thd_perubahan_teknologi(),
-    lambda: 0,
-    lambda: 3,
-    time_step,
-    "_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay",
-)
-
-
-@component.add(
-    name="Elastisitas LPE thd perubahan teknologi",
-    units="1",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "elastisitas_lpe_thd_perubahan_teknologi_historis": 1,
-        "perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay": 1,
-    },
-)
-def elastisitas_lpe_thd_perubahan_teknologi():
-    return (
-        elastisitas_lpe_thd_perubahan_teknologi_historis()
-        + perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay()
-    )
-
-
-@component.add(
-    name="Elastisitas LPE thd perubahan teknologi target",
-    units="Dmnl",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def elastisitas_lpe_thd_perubahan_teknologi_target():
-    return 0.35
-
-
-@component.add(
-    name="Perubahan Lahan Terbangun per Kapita",
-    units="Ha/(tahun*jiwa)",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy": 1,
-        "lahan_terbangun_per_kapita": 1,
-    },
-)
-def perubahan_lahan_terbangun_per_kapita():
-    return (
-        laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy()
-        * lahan_terbangun_per_kapita()
-    )
-
-
-@component.add(
-    name="time to change Elastisitas LPE thd perubahan teknologi",
-    units="tahun",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def time_to_change_elastisitas_lpe_thd_perubahan_teknologi():
-    return 3000
-
-
-@component.add(
-    name="time to change Laju Perubahan Lahan Terbangun per Kapita",
-    units="tahun",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def time_to_change_laju_perubahan_lahan_terbangun_per_kapita():
-    return 3000
-
-
-@component.add(
-    name="perubahan Laju Perubahan Lahan Terbangun per Kapita",
-    units="1/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "laju_perubahan_lahan_terbangun_per_kapita_asumsi": 1,
-        "laju_perubahan_lahan_terbangun_per_kapita": 1,
-        "time_to_change_laju_perubahan_lahan_terbangun_per_kapita": 1,
-        "time": 1,
-    },
-)
-def perubahan_laju_perubahan_lahan_terbangun_per_kapita():
-    return step(
-        __data["time"],
-        laju_perubahan_lahan_terbangun_per_kapita_asumsi()
-        - laju_perubahan_lahan_terbangun_per_kapita(),
-        time_to_change_laju_perubahan_lahan_terbangun_per_kapita(),
-    )
-
-
-@component.add(
-    name="Laju Perubahan Lahan Terbangun per Kapita asumsi",
+    name="laju pertumbuhan populasi asumsi",
     units="1/tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def laju_perubahan_lahan_terbangun_per_kapita_asumsi():
-    return 0.05
-
-
-@component.add(
-    name="Laju Perubahan Lahan Terbangun per Kapita historis and policy",
-    units="1/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "laju_perubahan_lahan_terbangun_per_kapita": 1,
-        "perubahan_laju_perubahan_lahan_terbangun_per_kapita_delay": 1,
-    },
-)
-def laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy():
-    return (
-        laju_perubahan_lahan_terbangun_per_kapita()
-        + perubahan_laju_perubahan_lahan_terbangun_per_kapita_delay()
-    )
+def laju_pertumbuhan_populasi_asumsi():
+    return 0.01514
 
 
 @component.add(
@@ -453,30 +141,34 @@ _delay_perubahan_laju_perubahan_lahan_terbangun_per_kapita_delay = Delay(
 
 
 @component.add(
-    name="Total kebutuhan air berbasis ekonomi",
-    units="m*m*m/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "kebutuhan_air_perkebunan_sk_146": 1,
-        "kebutuhan_air_pertanian_sk_146": 1,
-    },
-)
-def total_kebutuhan_air_berbasis_ekonomi():
-    return (
-        kebutuhan_air_perkebunan_sk_146() + kebutuhan_air_pertanian_sk_146()
-    ) / 3.12077
-
-
-@component.add(
-    name="mps historical and policy",
+    name="perubahan Elastisitas LPE thd perubahan teknologi",
     units="1",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"mps": 1, "mps_change_delay": 1},
+    depends_on={
+        "elastisitas_lpe_thd_perubahan_teknologi_target": 1,
+        "elastisitas_lpe_thd_perubahan_teknologi_historis": 1,
+        "time_to_change_elastisitas_lpe_thd_perubahan_teknologi": 1,
+        "time": 1,
+    },
 )
-def mps_historical_and_policy():
-    return mps() + mps_change_delay()
+def perubahan_elastisitas_lpe_thd_perubahan_teknologi():
+    return step(
+        __data["time"],
+        elastisitas_lpe_thd_perubahan_teknologi_target()
+        - elastisitas_lpe_thd_perubahan_teknologi_historis(),
+        time_to_change_elastisitas_lpe_thd_perubahan_teknologi(),
+    )
+
+
+@component.add(
+    name="delay on change Elastisitas LPE thd perubahan teknologi",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def delay_on_change_elastisitas_lpe_thd_perubahan_teknologi():
+    return 5
 
 
 @component.add(
@@ -497,6 +189,143 @@ def delay_on_mps_change_assumption():
 )
 def delay_on_perubahan_laju_pertumbuhan_populasi():
     return 5
+
+
+@component.add(
+    name="delay on perubahan Laju Perubahan Lahan Terbangun per Kapita",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def delay_on_perubahan_laju_perubahan_lahan_terbangun_per_kapita():
+    return 5
+
+
+@component.add(
+    name="mps historical and policy",
+    units="1",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"mps": 1, "mps_change_delay": 1},
+)
+def mps_historical_and_policy():
+    return mps() + mps_change_delay()
+
+
+@component.add(
+    name="Elastisitas LPE thd perubahan teknologi",
+    units="1",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "elastisitas_lpe_thd_perubahan_teknologi_historis": 1,
+        "perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay": 1,
+    },
+)
+def elastisitas_lpe_thd_perubahan_teknologi():
+    return (
+        elastisitas_lpe_thd_perubahan_teknologi_historis()
+        + perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay()
+    )
+
+
+@component.add(
+    name="Pertumbuhan populasi",
+    units="jiwa/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"populasi_pulau": 1, "lpp_historis_dan_policy": 1},
+)
+def pertumbuhan_populasi():
+    return populasi_pulau() * lpp_historis_dan_policy()
+
+
+@component.add(
+    name="perubahan Laju Perubahan Lahan Terbangun per Kapita",
+    units="1/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "laju_perubahan_lahan_terbangun_per_kapita_asumsi": 1,
+        "laju_perubahan_lahan_terbangun_per_kapita": 1,
+        "time_to_change_laju_perubahan_lahan_terbangun_per_kapita": 1,
+        "time": 1,
+    },
+)
+def perubahan_laju_perubahan_lahan_terbangun_per_kapita():
+    return step(
+        __data["time"],
+        laju_perubahan_lahan_terbangun_per_kapita_asumsi()
+        - laju_perubahan_lahan_terbangun_per_kapita(),
+        time_to_change_laju_perubahan_lahan_terbangun_per_kapita(),
+    )
+
+
+@component.add(
+    name="perubahan Elastisitas LPE thd perubahan teknologi delay",
+    units="Dmnl",
+    comp_type="Stateful",
+    comp_subtype="Delay",
+    depends_on={"_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay": 1},
+    other_deps={
+        "_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay": {
+            "initial": {"delay_on_change_elastisitas_lpe_thd_perubahan_teknologi": 1},
+            "step": {
+                "perubahan_elastisitas_lpe_thd_perubahan_teknologi": 1,
+                "delay_on_change_elastisitas_lpe_thd_perubahan_teknologi": 1,
+            },
+        }
+    },
+)
+def perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay():
+    return _delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay()
+
+
+_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay = Delay(
+    lambda: perubahan_elastisitas_lpe_thd_perubahan_teknologi(),
+    lambda: delay_on_change_elastisitas_lpe_thd_perubahan_teknologi(),
+    lambda: 0,
+    lambda: 3,
+    time_step,
+    "_delay_perubahan_elastisitas_lpe_thd_perubahan_teknologi_delay",
+)
+
+
+@component.add(
+    name="time to change mps assumption",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def time_to_change_mps_assumption():
+    return 2030
+
+
+@component.add(
+    name="Laju Perubahan Lahan Terbangun per Kapita asumsi",
+    units="1/tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def laju_perubahan_lahan_terbangun_per_kapita_asumsi():
+    return 0.03
+
+
+@component.add(
+    name="Perubahan Lahan Terbangun per Kapita",
+    units="Ha/(tahun*jiwa)",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy": 1,
+        "lahan_terbangun_per_kapita": 1,
+    },
+)
+def perubahan_lahan_terbangun_per_kapita():
+    return (
+        laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy()
+        * lahan_terbangun_per_kapita()
+    )
 
 
 @component.add(
@@ -550,31 +379,90 @@ _delay_perubahan_laju_pertumbuhan_populasi_delay = Delay(
 
 
 @component.add(
-    name="time to change mps assumption",
+    name="Tabungan",
+    units="JutaRp/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"mps_historical_and_policy": 1, "pendapatan_untuk_digunakan": 1},
+)
+def tabungan():
+    return mps_historical_and_policy() * pendapatan_untuk_digunakan()
+
+
+@component.add(
+    name="time to change Elastisitas LPE thd perubahan teknologi",
     units="tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def time_to_change_mps_assumption():
+def time_to_change_elastisitas_lpe_thd_perubahan_teknologi():
     return 3000
 
 
 @component.add(
-    name="mps assumption", units="Dmnl", comp_type="Constant", comp_subtype="Normal"
+    name="LPP historis dan policy",
+    units="1/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "laju_pertumbuhan_populasi": 1,
+        "perubahan_laju_pertumbuhan_populasi_delay": 1,
+    },
 )
-def mps_assumption():
-    return 0.3
+def lpp_historis_dan_policy():
+    return laju_pertumbuhan_populasi() + perubahan_laju_pertumbuhan_populasi_delay()
 
 
 @component.add(
-    name="Pertumbuhan populasi",
-    units="jiwa/tahun",
+    name="time to change Laju Perubahan Lahan Terbangun per Kapita",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def time_to_change_laju_perubahan_lahan_terbangun_per_kapita():
+    return 3000
+
+
+@component.add(
+    name="Elastisitas LPE thd perubahan teknologi target",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def elastisitas_lpe_thd_perubahan_teknologi_target():
+    return 0.35
+
+
+@component.add(
+    name="Laju Perubahan Lahan Terbangun per Kapita historis and policy",
+    units="1/tahun",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"populasi_pulau": 1, "lpp_historis_dan_policy": 1},
+    depends_on={
+        "laju_perubahan_lahan_terbangun_per_kapita": 1,
+        "perubahan_laju_perubahan_lahan_terbangun_per_kapita_delay": 1,
+    },
 )
-def pertumbuhan_populasi():
-    return populasi_pulau() * lpp_historis_dan_policy()
+def laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy():
+    return (
+        laju_perubahan_lahan_terbangun_per_kapita()
+        + perubahan_laju_perubahan_lahan_terbangun_per_kapita_delay()
+    )
+
+
+@component.add(
+    name="Perubahan tk teknologi",
+    units="1/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "lpe_pulau": 1,
+        "elastisitas_lpe_thd_perubahan_teknologi": 1,
+        "tingkat_teknologi": 1,
+    },
+)
+def perubahan_tk_teknologi():
+    return lpe_pulau() * elastisitas_lpe_thd_perubahan_teknologi() * tingkat_teknologi()
 
 
 @component.add(
@@ -605,24 +493,20 @@ _delay_mps_change_delay = Delay(
 
 
 @component.add(
-    name="Tabungan",
-    units="JutaRp/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"mps_historical_and_policy": 1, "pendapatan_untuk_digunakan": 1},
+    name="mps assumption", units="Dmnl", comp_type="Constant", comp_subtype="Normal"
 )
-def tabungan():
-    return mps_historical_and_policy() * pendapatan_untuk_digunakan()
+def mps_assumption():
+    return 0.4
 
 
 @component.add(
-    name="laju pertumbuhan populasi asumsi",
-    units="1/tahun",
+    name="time to change laju pertumbuhan populasi asumsi",
+    units="tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def laju_pertumbuhan_populasi_asumsi():
-    return 0.03
+def time_to_change_laju_pertumbuhan_populasi_asumsi():
+    return 3000
 
 
 @component.add(
@@ -644,52 +528,184 @@ def mps_change():
 
 
 @component.add(
-    name="time to change laju pertumbuhan populasi asumsi",
-    units="tahun",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def time_to_change_laju_pertumbuhan_populasi_asumsi():
-    return 3000
-
-
-@component.add(
-    name="LPP historis dan policy",
-    units="1/tahun",
+    name="Ambang Batas populasi Air",
+    units="jiwa",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "laju_pertumbuhan_populasi": 1,
-        "perubahan_laju_pertumbuhan_populasi_delay": 1,
+        "total_ketersediaan_air_bisa_digunakan": 1,
+        "std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023": 1,
     },
 )
-def lpp_historis_dan_policy():
-    return laju_pertumbuhan_populasi() + perubahan_laju_pertumbuhan_populasi_delay()
+def ambang_batas_populasi_air():
+    return (
+        total_ketersediaan_air_bisa_digunakan()
+        / std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023()
+    )
 
 
 @component.add(
-    name="Total ketersediaan air",
-    units="m*m*m/tahun",
+    name="Indeks D3T Air",
+    units="1",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "potensi_air_tanah": 1,
-        "aktivasi_potensi_air_tanah": 1,
-        "supply_air_permukaan": 1,
-    },
+    depends_on={"rasio_kecukupan_air_sk_146": 1},
 )
-def total_ketersediaan_air():
-    return potensi_air_tanah() * aktivasi_potensi_air_tanah() + supply_air_permukaan()
+def indeks_d3t_air():
+    return 1 / rasio_kecukupan_air_sk_146()
 
 
 @component.add(
-    name="aktivasi potensi air tanah",
+    name="Fraksi lahan pangan dimanfaatkan",
     units="Dmnl",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def aktivasi_potensi_air_tanah():
-    return 0
+def fraksi_lahan_pangan_dimanfaatkan():
+    return 0.637417
+
+
+@component.add(
+    name="Indeks D3T Lahan",
+    units="1",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"biokapasitas_pangan": 1, "kebutuhan_lahan": 1},
+)
+def indeks_d3t_lahan():
+    return biokapasitas_pangan() / kebutuhan_lahan()
+
+
+@component.add(
+    name='"std kebutuhan air per kapita kebutuhan SK 146/2023"',
+    units="m*m*m/(tahun*jiwa)",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def std_kebutuhan_air_per_kapita_kebutuhan_sk_1462023():
+    return 850
+
+
+@component.add(
+    name="Biokapasitas Pangan",
+    units="Ha",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "total_lahan": 1,
+        "pertambangan": 1,
+        "lahan_lainnya": 1,
+        "lahan_terbangun": 1,
+        "fraksi_lahan_pangan_dimanfaatkan": 1,
+    },
+)
+def biokapasitas_pangan():
+    return (
+        total_lahan() - pertambangan() - lahan_lainnya() - lahan_terbangun()
+    ) * fraksi_lahan_pangan_dimanfaatkan()
+
+
+@component.add(
+    name="Kebutuhan lahan per orang",
+    units="Ha/jiwa",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"lahan_builtup_per_kapita": 1, "lahan_pangan_per_kapita": 1},
+)
+def kebutuhan_lahan_per_orang():
+    return lahan_builtup_per_kapita() + lahan_pangan_per_kapita()
+
+
+@component.add(
+    name="Kebutuhan lahan",
+    units="Ha",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"populasi_pulau": 1, "kebutuhan_lahan_per_orang": 1},
+)
+def kebutuhan_lahan():
+    return populasi_pulau() * kebutuhan_lahan_per_orang()
+
+
+@component.add(
+    name="Ambang Batas populasi dari Lahan",
+    units="jiwa",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"biokapasitas_pangan": 1, "kebutuhan_lahan_per_orang": 1},
+)
+def ambang_batas_populasi_dari_lahan():
+    return biokapasitas_pangan() / kebutuhan_lahan_per_orang()
+
+
+@component.add(
+    name="Total kebutuhan air SK 146",
+    units="m*m*m/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"kebutuhan_air_ekonomi": 1, "kebutuhan_air_domestik_sk_146": 1},
+)
+def total_kebutuhan_air_sk_146():
+    return kebutuhan_air_ekonomi() + kebutuhan_air_domestik_sk_146()
+
+
+@component.add(
+    name="Kebutuhan air ekonomi",
+    units="m*m*m/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "kebutuhan_air_perkebunan_sk_146": 1,
+        "kebutuhan_air_pertanian_sk_146": 1,
+    },
+)
+def kebutuhan_air_ekonomi():
+    """
+    dikali faktor kalibrasi dengan laporan
+    """
+    return (
+        kebutuhan_air_perkebunan_sk_146() + kebutuhan_air_pertanian_sk_146()
+    ) * 0.447061
+
+
+@component.add(
+    name="Biokapasitas tempat tinggal",
+    units="Ha",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"lahan_terbangun": 1},
+)
+def biokapasitas_tempat_tinggal():
+    return lahan_terbangun()
+
+
+@component.add(
+    name="kebutuhan air pertanian SK 146",
+    units="m*m*m/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "pertanian": 1,
+        "std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan": 1,
+        "koefisien_i_persawahan": 1,
+    },
+)
+def kebutuhan_air_pertanian_sk_146():
+    return (
+        pertanian()
+        * std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan()
+        * koefisien_i_persawahan()
+    )
+
+
+@component.add(
+    name='"Lahan Built-up per kapita"',
+    units="Ha/jiwa",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def lahan_builtup_per_kapita():
+    return 0.0024956
 
 
 @component.add(
@@ -697,20 +713,32 @@ def aktivasi_potensi_air_tanah():
     units="Ha",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"populasi_pulau": 1, "lahan_builtup_per_kapita": 1},
+    depends_on={"lahan_builtup_per_kapita": 1, "populasi_pulau": 1},
 )
 def jejak_ekologis_tempat_tinggal():
-    return populasi_pulau() * lahan_builtup_per_kapita()
+    return lahan_builtup_per_kapita() * populasi_pulau()
 
 
 @component.add(
-    name="Koefisien I pertanian lahan kering",
-    units="Dmnl",
-    comp_type="Constant",
+    name="Rasio kecukupan lahan tempat tinggal",
+    units="1",
+    comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"biokapasitas_tempat_tinggal": 1, "jejak_ekologis_tempat_tinggal": 1},
 )
-def koefisien_i_pertanian_lahan_kering():
-    return 1.5
+def rasio_kecukupan_lahan_tempat_tinggal():
+    return biokapasitas_tempat_tinggal() / jejak_ekologis_tempat_tinggal()
+
+
+@component.add(
+    name="Ambang batas penduduk tempat tinggal",
+    units="jiwa",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"biokapasitas_tempat_tinggal": 1, "lahan_builtup_per_kapita": 1},
+)
+def ambang_batas_penduduk_tempat_tinggal():
+    return biokapasitas_tempat_tinggal() / lahan_builtup_per_kapita()
 
 
 @component.add(
@@ -724,29 +752,17 @@ def faktor_koreksi_kebutuhan_air_per_kap_sk_1462023():
 
 
 @component.add(
-    name="Rasio Kecukupan lahan tempat tinggal",
-    units="1",
-    comp_type="Auxiliary",
+    name="aktivasi potensi air tanah",
+    units="Dmnl",
+    comp_type="Constant",
     comp_subtype="Normal",
-    depends_on={"biokapasitas_tempat_tinggal": 1, "jejak_ekologis_tempat_tinggal": 1},
 )
-def rasio_kecukupan_lahan_tempat_tinggal():
-    return biokapasitas_tempat_tinggal() / jejak_ekologis_tempat_tinggal()
+def aktivasi_potensi_air_tanah():
+    return 0
 
 
 @component.add(
-    name="Ambang Batas penduduk tempat tinggal",
-    units="jiwa",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"biokapasitas_tempat_tinggal": 1, "lahan_builtup_per_kapita": 1},
-)
-def ambang_batas_penduduk_tempat_tinggal():
-    return biokapasitas_tempat_tinggal() / lahan_builtup_per_kapita()
-
-
-@component.add(
-    name="Koefisien I perkebunan",
+    name="koefisien I perkebunan",
     units="Dmnl",
     comp_type="Constant",
     comp_subtype="Normal",
@@ -761,35 +777,36 @@ def koefisien_i_perkebunan():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan": 1,
         "koefisien_i_perkebunan": 1,
+        "std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan": 1,
     },
 )
 def std_kebutuhan_air_per_perkebunan_sk_1462023_tahunan():
     return (
-        std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan()
-        * koefisien_i_perkebunan()
+        koefisien_i_perkebunan()
+        * std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan()
     )
 
 
 @component.add(
-    name='"Lahan Built-up per kapita"',
-    units="Ha/jiwa",
-    comp_type="Constant",
+    name="Kebutuhan Lahan Terbangun",
+    units="Ha",
+    comp_type="Auxiliary",
     comp_subtype="Normal",
+    depends_on={"lahan_terbangun_per_kapita": 1, "populasi_pulau": 1},
 )
-def lahan_builtup_per_kapita():
-    return 0.002
+def kebutuhan_lahan_terbangun():
+    return lahan_terbangun_per_kapita() * populasi_pulau()
 
 
 @component.add(
-    name="Koefisien I persawahan",
+    name="koefisien I pertanian lahan kering",
     units="Dmnl",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def koefisien_i_persawahan():
-    return 4
+def koefisien_i_pertanian_lahan_kering():
+    return 1.5
 
 
 @component.add(
@@ -812,7 +829,22 @@ def kebutuhan_air_domestik_sk_146():
 
 
 @component.add(
-    name="Koefisien I pertanian lahan kering campur",
+    name="Total ketersediaan air",
+    units="m*m*m/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "potensi_air_tanah": 1,
+        "aktivasi_potensi_air_tanah": 1,
+        "supply_air_permukaan": 1,
+    },
+)
+def total_ketersediaan_air():
+    return potensi_air_tanah() * aktivasi_potensi_air_tanah() + supply_air_permukaan()
+
+
+@component.add(
+    name="koefisien I pertanian lahan kering campur",
     units="Dmnl",
     comp_type="Constant",
     comp_subtype="Normal",
@@ -822,44 +854,795 @@ def koefisien_i_pertanian_lahan_kering_campur():
 
 
 @component.add(
-    name="kebutuhan air pertanian SK 146",
-    units="m*m*m/tahun",
+    name="Lahan Terbangun per Kapita Init",
+    units="Ha/jiwa",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "std_kebutuhan_air_per_pertanian_sk_1462023_tahunan": 1,
-        "pertanian": 1,
-    },
+    depends_on={"mult": 1, "lahan_terbangun": 1, "populasi_pulau": 1},
 )
-def kebutuhan_air_pertanian_sk_146():
-    return std_kebutuhan_air_per_pertanian_sk_1462023_tahunan() * pertanian()
+def lahan_terbangun_per_kapita_init():
+    """
+    0.0344
+    """
+    return mult() * lahan_terbangun() / populasi_pulau()
 
 
 @component.add(
-    name="Biokapasitas tempat tinggal",
-    units="Ha",
+    name='"Minimum Fraction Rawa & Badan Air"',
+    units="Dmnl",
     comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"lahan_terbangun": 1},
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
 )
-def biokapasitas_tempat_tinggal():
-    return lahan_terbangun()
+def minimum_fraction_rawa_badan_air():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
 
 
 @component.add(
-    name='"std kebutuhan air per pertanian SK 146/2023 tahunan"',
-    units="m*m*m/(Ha*tahun)",
+    name="Minimum Fraction Hutan Mangrove",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_hutan_mangrove():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Hutan Tanaman",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_hutan_tanaman():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Lahan Lainnya",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_lahan_lainnya():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Lahan Terbangun",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_lahan_terbangun():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Perkebunan",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_perkebunan():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Pertambangan",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_pertambangan():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Belukar Padang Rumput",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_belukar_padang_rumput():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Hutan dan Belukar",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_hutan_dan_belukar():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Minimum Fraction Pertanian",
+    units="Dmnl",
+    comp_type="Auxiliary",
+    comp_subtype="with Lookup",
+    depends_on={"time_index": 1},
+)
+def minimum_fraction_pertanian():
+    return np.interp(
+        time_index(),
+        [
+            2000.0,
+            2001.0,
+            2002.0,
+            2003.0,
+            2004.0,
+            2005.0,
+            2006.0,
+            2007.0,
+            2008.0,
+            2009.0,
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+        ],
+        [
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+            0.1,
+        ],
+    )
+
+
+@component.add(
+    name="Pertanian to Lahan Terbangun",
+    units="Ha/tahun",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan": 1,
-        "koefisien_i_persawahan": 1,
+        "pertanian_to_lahan_terbangun_indicated": 1,
+        "availability_effect_pertanian": 1,
     },
 )
-def std_kebutuhan_air_per_pertanian_sk_1462023_tahunan():
+def pertanian_to_lahan_terbangun():
+    return pertanian_to_lahan_terbangun_indicated() * availability_effect_pertanian()
+
+
+@component.add(
+    name="Hutan Tanaman to Lahan Terbangun",
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "availability_effect_hutan_tanaman": 1,
+        "hutan_tanaman_to_lahan_terbangun_indicated": 1,
+    },
+)
+def hutan_tanaman_to_lahan_terbangun():
     return (
-        std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan()
-        * koefisien_i_persawahan()
+        availability_effect_hutan_tanaman()
+        * hutan_tanaman_to_lahan_terbangun_indicated()
+    )
+
+
+@component.add(
+    name='"Hutan Primer & Hutan Sekunder to Lahan Terbangun"',
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "hutan_primer_hutan_sekunder_to_lahan_terbangun_indicated": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
+    },
+)
+def hutan_primer_hutan_sekunder_to_lahan_terbangun():
+    return (
+        hutan_primer_hutan_sekunder_to_lahan_terbangun_indicated()
+        * availability_effect_hutan_primer_sekunder()
+    )
+
+
+@component.add(
+    name="Lahan Lainnya ke Lahan Terbangun",
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "lahan_lainnya_ke_lahan_terbangun_indicated": 1,
+        "availability_effect_lahan_lainnya": 1,
+    },
+)
+def lahan_lainnya_ke_lahan_terbangun():
+    return (
+        lahan_lainnya_ke_lahan_terbangun_indicated()
+        * availability_effect_lahan_lainnya()
+    )
+
+
+@component.add(
+    name="Belukar Padang Rumput to Lahan Terbangun",
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "belukar_padang_rumput_to_lahan_terbangun_indicated": 1,
+        "availability_effect_belukar_padang_rumput": 1,
+    },
+)
+def belukar_padang_rumput_to_lahan_terbangun():
+    return (
+        belukar_padang_rumput_to_lahan_terbangun_indicated()
+        * availability_effect_belukar_padang_rumput()
+    )
+
+
+@component.add(
+    name="Hutan Mangrove to Lahan Terbangun",
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "availability_effect_hutan_mangrove": 1,
+        "hutan_mangrove_to_lahan_terbangun_indicated": 1,
+    },
+)
+def hutan_mangrove_to_lahan_terbangun():
+    return (
+        availability_effect_hutan_mangrove()
+        * hutan_mangrove_to_lahan_terbangun_indicated()
+    )
+
+
+@component.add(
+    name="Perkebunan to Lahan Terbangun",
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "availability_effect_perkebunan": 1,
+        "perkebunan_to_lahan_terbangun_indicated": 1,
+    },
+)
+def perkebunan_to_lahan_terbangun():
+    return availability_effect_perkebunan() * perkebunan_to_lahan_terbangun_indicated()
+
+
+@component.add(
+    name='"Rawa & Badan Air ke Lahan Terbangun"',
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "rawa_badan_air_ke_lahan_terbangun_indicated": 1,
+        "availability_effect_rawa_badan_air": 1,
+    },
+)
+def rawa_badan_air_ke_lahan_terbangun():
+    return (
+        rawa_badan_air_ke_lahan_terbangun_indicated()
+        * availability_effect_rawa_badan_air()
+    )
+
+
+@component.add(
+    name="Pertambangan ke Lahan Terbangun",
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "availability_effect_pertambangan": 1,
+        "pertambangan_ke_lahan_terbangun_indicated": 1,
+    },
+)
+def pertambangan_ke_lahan_terbangun():
+    return (
+        availability_effect_pertambangan() * pertambangan_ke_lahan_terbangun_indicated()
+    )
+
+
+@component.add(
+    name="Lahan Terbangun per Kapita",
+    units="Ha/jiwa",
+    comp_type="Stateful",
+    comp_subtype="Integ",
+    depends_on={"_integ_lahan_terbangun_per_kapita": 1},
+    other_deps={
+        "_integ_lahan_terbangun_per_kapita": {
+            "initial": {"lahan_terbangun_per_kapita_init": 1},
+            "step": {"perubahan_lahan_terbangun_per_kapita": 1},
+        }
+    },
+)
+def lahan_terbangun_per_kapita():
+    return _integ_lahan_terbangun_per_kapita()
+
+
+_integ_lahan_terbangun_per_kapita = Integ(
+    lambda: perubahan_lahan_terbangun_per_kapita(),
+    lambda: lahan_terbangun_per_kapita_init(),
+    "_integ_lahan_terbangun_per_kapita",
+)
+
+
+@component.add(
+    name="Peralihan ke Lahan Terbangun Aktual",
+    units="Ha/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "belukar_padang_rumput_to_lahan_terbangun": 1,
+        "hutan_primer_hutan_sekunder_to_lahan_terbangun": 1,
+        "hutan_mangrove_to_lahan_terbangun": 1,
+        "hutan_tanaman_to_lahan_terbangun": 1,
+        "lahan_lainnya_ke_lahan_terbangun": 1,
+        "perkebunan_to_lahan_terbangun": 1,
+        "pertambangan_ke_lahan_terbangun": 1,
+        "pertanian_to_lahan_terbangun": 1,
+        "rawa_badan_air_ke_lahan_terbangun": 1,
+    },
+)
+def peralihan_ke_lahan_terbangun_aktual():
+    return (
+        belukar_padang_rumput_to_lahan_terbangun()
+        + hutan_primer_hutan_sekunder_to_lahan_terbangun()
+        + hutan_mangrove_to_lahan_terbangun()
+        + hutan_tanaman_to_lahan_terbangun()
+        + lahan_lainnya_ke_lahan_terbangun()
+        + perkebunan_to_lahan_terbangun()
+        + pertambangan_ke_lahan_terbangun()
+        + pertanian_to_lahan_terbangun()
+        + rawa_badan_air_ke_lahan_terbangun()
+    )
+
+
+@component.add(
+    name="Perubahan KLR Proxy",
+    units="JutaRp/(tahun*jiwa)",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"klr_proxy": 1, "laju_perubahan_klr": 1, "mult_klr": 1},
+)
+def perubahan_klr_proxy():
+    return klr_proxy() * laju_perubahan_klr() * mult_klr()
+
+
+@component.add(
+    name="mult KLR", units="Dmnl", comp_type="Constant", comp_subtype="Normal"
+)
+def mult_klr():
+    return 0.84
+
+
+@component.add(
+    name="PDRB Pulau",
+    units="JutaRp/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "pdrb_pulau_awal": 1,
+        "kapital": 1,
+        "kapital_awal": 1,
+        "intensitas_kapital": 2,
+        "tenaga_kerja_awal": 1,
+        "tenaga_kerja": 1,
+        "tingkat_teknologi": 1,
+        "capacity_utilization_factor": 1,
+        "dampak_kecukupan_air_industri_ekonomi": 1,
+        "dampak_kualitas_air_industri_ekonomi_delay": 1,
+    },
+)
+def pdrb_pulau():
+    return (
+        pdrb_pulau_awal()
+        * (kapital() / kapital_awal()) ** intensitas_kapital()
+        * (tenaga_kerja() / tenaga_kerja_awal()) ** (1 - intensitas_kapital())
+        * tingkat_teknologi()
+        * capacity_utilization_factor()
+        * dampak_kecukupan_air_industri_ekonomi()
+        * dampak_kualitas_air_industri_ekonomi_delay()
     )
 
 
@@ -878,47 +1661,6 @@ def ambang_batas_penduduk_air():
 
 
 @component.add(
-    name="Kebutuhan Lahan Terbangun",
-    units="Ha",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"lahan_terbangun_per_kapita": 1, "populasi_historisprojeksi": 1},
-)
-def kebutuhan_lahan_terbangun():
-    return lahan_terbangun_per_kapita() * populasi_historisprojeksi()
-
-
-@component.add(
-    name="PDRB Pulau",
-    units="JutaRp/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "pdrb_provinsi_awal": 1,
-        "kapital_awal": 1,
-        "intensitas_kapital": 2,
-        "kapital": 1,
-        "tenaga_kerja_awal": 1,
-        "tenaga_kerja": 1,
-        "tingkat_teknologi": 1,
-        "capacity_utilization_factor": 1,
-        "dampak_kecukupan_air_industri_ekonomi": 1,
-        "dampak_kualitas_air_industri_ekonomi_delay": 1,
-    },
-)
-def pdrb_pulau():
-    return (
-        pdrb_provinsi_awal()
-        * (kapital() / kapital_awal()) ** intensitas_kapital()
-        * (tenaga_kerja() / tenaga_kerja_awal()) ** (1 - intensitas_kapital())
-        * tingkat_teknologi()
-        * capacity_utilization_factor()
-        * dampak_kecukupan_air_industri_ekonomi()
-        * dampak_kualitas_air_industri_ekonomi_delay()
-    )
-
-
-@component.add(
     name="Ambang Batas Penduduk Pangan",
     units="jiwa",
     comp_type="Auxiliary",
@@ -927,30 +1669,6 @@ def pdrb_pulau():
 )
 def ambang_batas_penduduk_pangan():
     return biokapasitas_pangan() / lahan_pangan_per_kapita()
-
-
-@component.add(
-    name="Lahan Terbangun per Kapita",
-    units="Ha/jiwa",
-    comp_type="Stateful",
-    comp_subtype="Integ",
-    depends_on={"_integ_lahan_terbangun_per_kapita": 1},
-    other_deps={
-        "_integ_lahan_terbangun_per_kapita": {
-            "initial": {"lahan_terbangun_per_kapita_init": 1, "mult": 1},
-            "step": {"perubahan_lahan_terbangun_per_kapita": 1},
-        }
-    },
-)
-def lahan_terbangun_per_kapita():
-    return _integ_lahan_terbangun_per_kapita()
-
-
-_integ_lahan_terbangun_per_kapita = Integ(
-    lambda: perubahan_lahan_terbangun_per_kapita(),
-    lambda: lahan_terbangun_per_kapita_init() * mult(),
-    "_integ_lahan_terbangun_per_kapita",
-)
 
 
 @component.add(
@@ -964,21 +1682,10 @@ def laju_perubahan_lahan_terbangun_per_kapita():
     """
     ([(2016,0)-(2025,0.3)],(2016,0.205325),(2017,0.164053),(2018,0.136615),(201 9,0.115691),(2020,0.122478),(2021,0.091922 ),(2022,0.113174),(2025,0.03) )
     """
-    return np.interp(time(), [2016.0, 2017.0, 2018.0], [0.192109, -0.0273538, 0.05])
-
-
-@component.add(
-    name="Populasi Papua Hist",
-    units="jiwa",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time": 1},
-)
-def populasi_papua_hist():
     return np.interp(
         time(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [4499530.0, 4670860.0, 4848740.0, 5033460.0, 5241530.0],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0, 2023.0],
+        [0.1, 0.15, 0.05, 0.05, 0.05, 0.05, 0.05, 0.03],
     )
 
 
@@ -1118,139 +1825,9 @@ def belukar_rumput_jasling_kehati_tinggi_dan_sangat_tinggi():
     )
 
 
-@component.add(
-    name="Lahan Lainnya ke Lahan Terbangun",
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "availability_effect_lahan_lainnya": 1,
-        "lahan_lainnya_ke_lahan_terbangun_indicated": 1,
-    },
-)
-def lahan_lainnya_ke_lahan_terbangun():
-    return (
-        availability_effect_lahan_lainnya()
-        * lahan_lainnya_ke_lahan_terbangun_indicated()
-    )
-
-
-@component.add(
-    name="Belukar Padang Rumput to Lahan Terbangun",
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "belukar_padang_rumput_to_lahan_terbangun_indicated": 1,
-        "availability_effect_belukar_padang_rumput": 1,
-    },
-)
-def belukar_padang_rumput_to_lahan_terbangun():
-    return (
-        belukar_padang_rumput_to_lahan_terbangun_indicated()
-        * availability_effect_belukar_padang_rumput()
-    )
-
-
-@component.add(
-    name="Pertanian to Lahan Terbangun",
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "pertanian_to_lahan_terbangun_indicated": 1,
-        "availability_effect_pertanian": 1,
-    },
-)
-def pertanian_to_lahan_terbangun():
-    return pertanian_to_lahan_terbangun_indicated() * availability_effect_pertanian()
-
-
-@component.add(
-    name="Perkebunan to Lahan Terbangun",
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "perkebunan_to_lahan_terbangun_indicated": 1,
-        "availability_effect_perkebunan": 1,
-    },
-)
-def perkebunan_to_lahan_terbangun():
-    return perkebunan_to_lahan_terbangun_indicated() * availability_effect_perkebunan()
-
-
-@component.add(
-    name="Hutan Mangrove to Lahan Terbangun",
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "hutan_mangrove_to_lahan_terbangun_indicated": 1,
-        "availability_effect_hutan_mangrove": 1,
-    },
-)
-def hutan_mangrove_to_lahan_terbangun():
-    return (
-        hutan_mangrove_to_lahan_terbangun_indicated()
-        * availability_effect_hutan_mangrove()
-    )
-
-
-@component.add(
-    name='"Rawa & Badan Air ke Lahan Terbangun"',
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "rawa_badan_air_ke_lahan_terbangun_indicated": 1,
-        "availability_effect_rawa_badan_air": 1,
-    },
-)
-def rawa_badan_air_ke_lahan_terbangun():
-    return (
-        rawa_badan_air_ke_lahan_terbangun_indicated()
-        * availability_effect_rawa_badan_air()
-    )
-
-
-@component.add(
-    name='"Hutan Primer & Hutan Sekunder to Lahan Terbangun"',
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "hutan_primer_hutan_sekunder_to_lahan_terbangun_indicated": 1,
-        "availability_effect_hutan_dan_belukar": 1,
-    },
-)
-def hutan_primer_hutan_sekunder_to_lahan_terbangun():
-    return (
-        hutan_primer_hutan_sekunder_to_lahan_terbangun_indicated()
-        * availability_effect_hutan_dan_belukar()
-    )
-
-
-@component.add(
-    name="Hutan Tanaman to Lahan Terbangun",
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "hutan_tanaman_to_lahan_terbangun_indicated": 1,
-        "availability_effect_hutan_tanaman": 1,
-    },
-)
-def hutan_tanaman_to_lahan_terbangun():
-    return (
-        hutan_tanaman_to_lahan_terbangun_indicated()
-        * availability_effect_hutan_tanaman()
-    )
-
-
 @component.add(name="mult", units="Dmnl", comp_type="Constant", comp_subtype="Normal")
 def mult():
-    return 1.25
+    return 1.4
 
 
 @component.add(
@@ -1287,16 +1864,16 @@ _integ_klr_proxy = Integ(
 def laju_perubahan_klr():
     return np.interp(
         time(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0, 2023.0],
+        [2010.0, 2011.0, 2012.0, 2013.0, 2014.0, 2015.0, 2016.0, 2017.0],
         [
-            0.0396886,
-            -0.0159515,
-            0.0569635,
-            0.0504288,
-            -0.0573524,
-            0.0188852,
-            0.0370801,
-            0.0185346,
+            0.0888695,
+            0.0499898,
+            0.0370392,
+            0.0878253,
+            0.0469389,
+            0.0436375,
+            0.114454,
+            0.0669649,
         ],
     )
 
@@ -1332,17 +1909,6 @@ def tk_pengangguran():
 )
 def tenaga_kerja_dari_klr():
     return kapital() / klr_proxy()
-
-
-@component.add(
-    name="Perubahan KLR Proxy",
-    units="JutaRp/(tahun*jiwa)",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"klr_proxy": 1, "laju_perubahan_klr": 1},
-)
-def perubahan_klr_proxy():
-    return klr_proxy() * laju_perubahan_klr()
 
 
 @component.add(
@@ -1760,7 +2326,11 @@ def share_rawa_badan_air_ke_pertanian():
     depends_on={"time": 1},
 )
 def hutan_primer_hutan_sekunder_to_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [1126, 8009, 16, 2373])
+    return np.interp(
+        time(),
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [85, 501, 1189, 0, 800, 0, 429],
+    )
 
 
 @component.add(
@@ -1799,7 +2369,9 @@ def perkebunan_to_pertanian_hist():
     depends_on={"time": 1},
 )
 def pertambangan_ke_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [0, 294, 0, 15])
+    return np.interp(
+        time(), [2016, 2017, 2018, 2019, 2020, 2021, 2022], [16, 0, 54, 0, 2070, 0, 357]
+    )
 
 
 @component.add(
@@ -1824,7 +2396,9 @@ def pertambangan_ke_lahan_terbangun_indicated():
     depends_on={"time": 1},
 )
 def hutan_tanaman_to_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time(), [2016, 2017, 2018, 2019, 2020, 2021, 2022], [0, 0, 14, 0, 5, 0, 3]
+    )
 
 
 @component.add(
@@ -1897,7 +2471,11 @@ def hutan_tanaman_to_perkebunan_indicated():
     depends_on={"time": 1},
 )
 def belukar_padang_rumput_to_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [2094, 22304, 748, 3396])
+    return np.interp(
+        time(),
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [6909, 1922, 6970, 278, 8119, 55, 4042],
+    )
 
 
 @component.add(
@@ -1977,7 +2555,11 @@ def belukar_padang_rumput_to_perkebunan_indicated():
     depends_on={"time": 1},
 )
 def hutan_mangrove_to_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [126, 668, 0, 361])
+    return np.interp(
+        time(),
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [25, 226, 500, 0, 391, 0, 190],
+    )
 
 
 @component.add(
@@ -2366,7 +2948,11 @@ def share_hutan_primer_hutan_sekunder_to_perkebunan():
     depends_on={"time": 1},
 )
 def perkebunan_to_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [187, 441, 0, 375])
+    return np.interp(
+        time(),
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [3477, 50, 2980, 129, 2604, 0, 1540],
+    )
 
 
 @component.add(
@@ -2671,7 +3257,11 @@ def pertambangan_ke_perkebunan_hist():
     depends_on={"time": 1},
 )
 def lahan_lainnya_ke_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [227, 2112, 0, 444])
+    return np.interp(
+        time(),
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [143, 312, 756, 0, 998, 26, 372],
+    )
 
 
 @component.add(
@@ -2693,7 +3283,11 @@ def hutan_mangrove_to_pertanian_hist():
     depends_on={"time": 1},
 )
 def pertanian_to_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [3863, 32032, 1278, 3299])
+    return np.interp(
+        time(),
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [39148, 8529, 59994, 1511, 51629, 457, 26878],
+    )
 
 
 @component.add(
@@ -2733,16 +3327,6 @@ def hutan_mangrove_to_perkebunan_indicated():
 
 
 @component.add(
-    name="Lahan Terbangun per Kapita Init",
-    units="Ha/jiwa",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def lahan_terbangun_per_kapita_init():
-    return 0.0344
-
-
-@component.add(
     name="Share Lahan Lainnya ke Perkebunan",
     units="Dmnl",
     comp_type="Auxiliary",
@@ -2764,7 +3348,11 @@ def share_lahan_lainnya_ke_perkebunan():
     depends_on={"time": 1},
 )
 def rawa_badan_air_ke_lahan_terbangun_hist():
-    return np.interp(time(), [2016, 2017, 2018, 2019], [0, 1017, 0, 9])
+    return np.interp(
+        time(),
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [388, 3, 850, 0, 904, 0, 357],
+    )
 
 
 @component.add(
@@ -3735,25 +4323,6 @@ def pertambangan_ke_lahan_lainnya():
 
 
 @component.add(
-    name="Pertambangan ke Lahan Terbangun",
-    units="Ha/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "pertambangan_ke_lahan_terbangun_share": 1,
-        "availability_effect_pertambangan": 1,
-        "pertambangan": 1,
-    },
-)
-def pertambangan_ke_lahan_terbangun():
-    return (
-        pertambangan_ke_lahan_terbangun_share()
-        * availability_effect_pertambangan()
-        * pertambangan()
-    )
-
-
-@component.add(
     name="Hutan Tanaman to Hutan Mangrove",
     units="Ha/tahun",
     comp_type="Auxiliary",
@@ -4215,14 +4784,14 @@ def hutan_tanaman_ke_lahan_lainnya():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder_ke_lahan_lainnya_share": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunder_ke_lahan_lainnya():
     return (
-        availability_effect_hutan_dan_belukar()
+        availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder_ke_lahan_lainnya_share()
         * hutan_primer_sekunder()
     )
@@ -4254,14 +4823,14 @@ def hutan_mangrove_to_belukar_padang_rumput():
     comp_subtype="Normal",
     depends_on={
         "hutan_primer_sekunder_to_belukar_padang_rumput_share": 1,
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunder_to_belukar_padang_rumput():
     return (
         hutan_primer_sekunder_to_belukar_padang_rumput_share()
-        * availability_effect_hutan_dan_belukar()
+        * availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder()
     )
 
@@ -4272,14 +4841,14 @@ def hutan_primer_hutan_sekunder_to_belukar_padang_rumput():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder_to_hutan_mangrove_share": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunder_to_hutan_mangrove():
     return (
-        availability_effect_hutan_dan_belukar()
+        availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder_to_hutan_mangrove_share()
         * hutan_primer_sekunder()
     )
@@ -4311,14 +4880,14 @@ def hutan_tanaman_ke_rawa_badan_air():
     comp_subtype="Normal",
     depends_on={
         "hutan_primer_sekunder_to_hutan_tanaman_share": 1,
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunder_to_hutan_tanaman():
     return (
         hutan_primer_sekunder_to_hutan_tanaman_share()
-        * availability_effect_hutan_dan_belukar()
+        * availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder()
     )
 
@@ -4330,14 +4899,14 @@ def hutan_primer_hutan_sekunder_to_hutan_tanaman():
     comp_subtype="Normal",
     depends_on={
         "hutan_primer_sekunder_to_perkebunan_share": 1,
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunder_to_perkebunan():
     return (
         hutan_primer_sekunder_to_perkebunan_share()
-        * availability_effect_hutan_dan_belukar()
+        * availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder()
     )
 
@@ -4368,14 +4937,14 @@ def hutan_tanaman_to_hutan_primer_sekunder():
     comp_subtype="Normal",
     depends_on={
         "hutan_primer_sekunder_ke_pertambangan_share": 1,
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunderke_pertambangan():
     return (
         hutan_primer_sekunder_ke_pertambangan_share()
-        * availability_effect_hutan_dan_belukar()
+        * availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder()
     )
 
@@ -4387,14 +4956,14 @@ def hutan_primer_hutan_sekunderke_pertambangan():
     comp_subtype="Normal",
     depends_on={
         "hutan_primer_sekunder_ke_rawa_badan_air_share": 1,
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunder_ke_rawa_badan_air():
     return (
         hutan_primer_sekunder_ke_rawa_badan_air_share()
-        * availability_effect_hutan_dan_belukar()
+        * availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder()
     )
 
@@ -4406,14 +4975,14 @@ def hutan_primer_hutan_sekunder_ke_rawa_badan_air():
     comp_subtype="Normal",
     depends_on={
         "hutan_primer_sekunder_to_pertanian_share": 1,
-        "availability_effect_hutan_dan_belukar": 1,
+        "availability_effect_hutan_primer_sekunder": 1,
         "hutan_primer_sekunder": 1,
     },
 )
 def hutan_primer_hutan_sekunder_to_pertanian():
     return (
         hutan_primer_sekunder_to_pertanian_share()
-        * availability_effect_hutan_dan_belukar()
+        * availability_effect_hutan_primer_sekunder()
         * hutan_primer_sekunder()
     )
 
@@ -4428,8 +4997,8 @@ def hutan_primer_hutan_sekunder_to_pertanian():
 def rawa_badan_air_hist():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [1356880.0, 1399790.0, 1284520.0, 1282570.0, 1285610.0],
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [392875, 399510, 412964, 442912, 443593, 448845, 451426],
     )
 
 
@@ -4620,26 +5189,29 @@ _integ_hutan_primer_sekunder = Integ(
 
 
 @component.add(
-    name="Padang Rumput Minimum",
+    name="Belukar Padang Rumput Minimum",
     units="Ha",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"belukar_padang_rumput_init": 1, "minimum_fraction_padang_rumput": 1},
+    depends_on={
+        "belukar_padang_rumput_init": 1,
+        "minimum_fraction_belukar_padang_rumput": 1,
+    },
 )
-def padang_rumput_minimum():
-    return belukar_padang_rumput_init() * minimum_fraction_padang_rumput()
+def belukar_padang_rumput_minimum():
+    return belukar_padang_rumput_init() * minimum_fraction_belukar_padang_rumput()
 
 
 @component.add(
-    name="Availability Effect Hutan dan Belukar",
+    name='"Availability Effect Hutan Primer & Sekunder"',
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
-    depends_on={"hutan_dan_belukar_ratio": 1},
+    depends_on={"hutan_primer_sekunder_ratio": 1},
 )
-def availability_effect_hutan_dan_belukar():
+def availability_effect_hutan_primer_sekunder():
     return np.interp(
-        hutan_dan_belukar_ratio(),
+        hutan_primer_sekunder_ratio(),
         [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
         [0.0, 0.0, 0.14, 0.255, 0.426, 0.574, 0.71, 0.83, 0.91, 0.97, 1.0],
     )
@@ -4650,11 +5222,11 @@ def availability_effect_hutan_dan_belukar():
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
-    depends_on={"hutan_lindung_konservasi_ratio": 1},
+    depends_on={"rawa_badan_air_ratio": 1},
 )
 def availability_effect_rawa_badan_air():
     return np.interp(
-        hutan_lindung_konservasi_ratio(),
+        rawa_badan_air_ratio(),
         [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
         [0.0, 0.0, 0.14, 0.255, 0.426, 0.574, 0.71, 0.83, 0.91, 0.97, 1.0],
     )
@@ -4695,11 +5267,11 @@ def availability_effect_lahan_terbangun():
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
-    depends_on={"padang_rumput_ratio": 1},
+    depends_on={"belukar_padang_rumput_ratio": 1},
 )
 def availability_effect_belukar_padang_rumput():
     return np.interp(
-        padang_rumput_ratio(),
+        belukar_padang_rumput_ratio(),
         [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
         [0.0, 0.0, 0.14, 0.255, 0.426, 0.574, 0.71, 0.83, 0.91, 0.97, 1.0],
     )
@@ -4740,11 +5312,11 @@ def availability_effect_pertambangan():
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
-    depends_on={"pertanian_lahan_basah_ratio": 1},
+    depends_on={"hutan_mangrove_ratio": 1},
 )
 def availability_effect_hutan_mangrove():
     return np.interp(
-        pertanian_lahan_basah_ratio(),
+        hutan_mangrove_ratio(),
         [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
         [0.0, 0.0, 0.14, 0.255, 0.426, 0.574, 0.71, 0.83, 0.91, 0.97, 1.0],
     )
@@ -4755,11 +5327,11 @@ def availability_effect_hutan_mangrove():
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
-    depends_on={"pertanian_lahan_kering_ratio": 1},
+    depends_on={"hutan_tanaman_ratio": 1},
 )
 def availability_effect_hutan_tanaman():
     return np.interp(
-        pertanian_lahan_kering_ratio(),
+        hutan_tanaman_ratio(),
         [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
         [0.0, 0.0, 0.14, 0.255, 0.426, 0.574, 0.71, 0.83, 0.91, 0.97, 1.0],
     )
@@ -4770,11 +5342,11 @@ def availability_effect_hutan_tanaman():
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
-    depends_on={"tambak_ratio": 1},
+    depends_on={"pertanian_ratio": 1},
 )
 def availability_effect_pertanian():
     return np.interp(
-        tambak_ratio(),
+        pertanian_ratio(),
         [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
         [0.0, 0.0, 0.14, 0.255, 0.426, 0.574, 0.71, 0.83, 0.91, 0.97, 1.0],
     )
@@ -5098,7 +5670,7 @@ _initial_pertambangan_init = Initial(
 
 
 @component.add(
-    name="Hutan dan Belukar Minimum",
+    name='"Hutan Primer & Sekunder Minimum"',
     units="Ha",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -5107,19 +5679,19 @@ _initial_pertambangan_init = Initial(
         "minimum_fraction_hutan_dan_belukar": 1,
     },
 )
-def hutan_dan_belukar_minimum():
+def hutan_primer_sekunder_minimum():
     return hutan_primer_sekunder_init() * minimum_fraction_hutan_dan_belukar()
 
 
 @component.add(
-    name="Hutan dan Belukar Ratio",
+    name='"Hutan Primer & Sekunder Ratio"',
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hutan_primer_sekunder": 1, "hutan_dan_belukar_minimum": 1},
+    depends_on={"hutan_primer_sekunder": 1, "hutan_primer_sekunder_minimum": 1},
 )
-def hutan_dan_belukar_ratio():
-    return hutan_primer_sekunder() / hutan_dan_belukar_minimum()
+def hutan_primer_sekunder_ratio():
+    return hutan_primer_sekunder() / hutan_primer_sekunder_minimum()
 
 
 @component.add(
@@ -5167,39 +5739,25 @@ _initial_hutan_mangrove_init = Initial(
 
 
 @component.add(
-    name="Time Index 0",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"time": 1, "time_unit": 1},
-)
-def time_index_0():
-    return time() / time_unit()
-
-
-@component.add(
-    name='"Hutan Lindung & Konservasi Minimum"',
+    name='"Rawa & Badan Air Minimum"',
     units="Ha",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={
-        "rawa_badan_air_init": 1,
-        "minimum_fraction_hutan_lindung_konservasi": 1,
-    },
+    depends_on={"rawa_badan_air_init": 1, "minimum_fraction_rawa_badan_air": 1},
 )
-def hutan_lindung_konservasi_minimum():
-    return rawa_badan_air_init() * minimum_fraction_hutan_lindung_konservasi()
+def rawa_badan_air_minimum():
+    return rawa_badan_air_init() * minimum_fraction_rawa_badan_air()
 
 
 @component.add(
-    name='"Hutan Lindung & Konservasi Ratio"',
+    name='"Rawa & Badan Air Ratio"',
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"rawa_badan_air": 1, "hutan_lindung_konservasi_minimum": 1},
+    depends_on={"rawa_badan_air": 1, "rawa_badan_air_minimum": 1},
 )
-def hutan_lindung_konservasi_ratio():
-    return rawa_badan_air() / hutan_lindung_konservasi_minimum()
+def rawa_badan_air_ratio():
+    return rawa_badan_air() / rawa_badan_air_minimum()
 
 
 @component.add(
@@ -5260,218 +5818,6 @@ _integ_rawa_badan_air = Integ(
     lambda: rawa_badan_air_init(),
     "_integ_rawa_badan_air",
 )
-
-
-@component.add(
-    name="Minimum Fraction Padang Rumput",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_padang_rumput():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
-
-
-@component.add(
-    name="Minimum Fraction Pertambangan",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_pertambangan():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
-
-
-@component.add(
-    name="Minimum Fraction Pertanian Lahan Kering",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_pertanian_lahan_kering():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
-
-
-@component.add(
-    name="Minimum Fraction Tambak",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_tambak():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
 
 
 @component.add(
@@ -5659,36 +6005,36 @@ _initial_pertanian_init = Initial(lambda: pertanian_hist(), "_initial_pertanian_
 
 
 @component.add(
-    name="Padang Rumput Ratio",
+    name="Belukar Padang Rumput Ratio",
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"belukar_padang_rumput": 1, "padang_rumput_minimum": 1},
+    depends_on={"belukar_padang_rumput": 1, "belukar_padang_rumput_minimum": 1},
 )
-def padang_rumput_ratio():
-    return belukar_padang_rumput() / padang_rumput_minimum()
+def belukar_padang_rumput_ratio():
+    return belukar_padang_rumput() / belukar_padang_rumput_minimum()
 
 
 @component.add(
-    name="Pertanian Lahan Kering Minimum",
+    name="Hutan Tanaman Minimum",
     units="Ha",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hutan_tanaman_init": 1, "minimum_fraction_pertanian_lahan_kering": 1},
+    depends_on={"hutan_tanaman_init": 1, "minimum_fraction_hutan_tanaman": 1},
 )
-def pertanian_lahan_kering_minimum():
-    return hutan_tanaman_init() * minimum_fraction_pertanian_lahan_kering()
+def hutan_tanaman_minimum():
+    return hutan_tanaman_init() * minimum_fraction_hutan_tanaman()
 
 
 @component.add(
-    name="Pertanian Lahan Kering Ratio",
+    name="Hutan Tanaman Ratio",
     units="1",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hutan_tanaman": 1, "pertanian_lahan_kering_minimum": 1},
+    depends_on={"hutan_tanaman": 1, "hutan_tanaman_minimum": 1},
 )
-def pertanian_lahan_kering_ratio():
-    return hutan_tanaman() / pertanian_lahan_kering_minimum()
+def hutan_tanaman_ratio():
+    return hutan_tanaman() / hutan_tanaman_minimum()
 
 
 @component.add(
@@ -5703,112 +6049,6 @@ def pertanian_lahan_kering_ratio():
 )
 def kebutuhan_air_perkebunan_sk_146():
     return perkebunan() * std_kebutuhan_air_per_perkebunan_sk_1462023_tahunan()
-
-
-@component.add(
-    name="Minimum Fraction Hutan dan Belukar",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_hutan_dan_belukar():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
-
-
-@component.add(
-    name='"Minimum Fraction Hutan Lindung & Konservasi"',
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_hutan_lindung_konservasi():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
 
 
 @component.add(
@@ -5869,59 +6109,6 @@ _integ_pertanian = Integ(
     lambda: pertanian_init(),
     "_integ_pertanian",
 )
-
-
-@component.add(
-    name="Minimum Fraction Perkebunan",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_perkebunan():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
 
 
 @component.add(
@@ -5992,67 +6179,14 @@ def time_unit():
 
 
 @component.add(
-    name="Tambak Minimum",
+    name="Pertanian Minimum",
     units="Ha",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"pertanian_init": 1, "minimum_fraction_tambak": 1},
+    depends_on={"pertanian_init": 1, "minimum_fraction_pertanian": 1},
 )
-def tambak_minimum():
-    return pertanian_init() * minimum_fraction_tambak()
-
-
-@component.add(
-    name="Minimum Fraction Lahan Terbangun",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_lahan_terbangun():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
+def pertanian_minimum():
+    return pertanian_init() * minimum_fraction_pertanian()
 
 
 @component.add(
@@ -6067,89 +6201,36 @@ def lahan_terbangun_ratio():
 
 
 @component.add(
-    name="Minimum Fraction Pertanian Lahan Basah",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_pertanian_lahan_basah():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
-
-
-@component.add(
-    name="Pertanian Lahan Basah Minimum",
+    name="Hutan Mangrove Minimum",
     units="Ha",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hutan_mangrove_init": 1, "minimum_fraction_pertanian_lahan_basah": 1},
+    depends_on={"hutan_mangrove_init": 1, "minimum_fraction_hutan_mangrove": 1},
 )
-def pertanian_lahan_basah_minimum():
-    return hutan_mangrove_init() * minimum_fraction_pertanian_lahan_basah()
+def hutan_mangrove_minimum():
+    return hutan_mangrove_init() * minimum_fraction_hutan_mangrove()
 
 
 @component.add(
-    name="Pertanian Lahan Basah Ratio",
+    name="Hutan Mangrove Ratio",
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"hutan_mangrove": 1, "pertanian_lahan_basah_minimum": 1},
+    depends_on={"hutan_mangrove": 1, "hutan_mangrove_minimum": 1},
 )
-def pertanian_lahan_basah_ratio():
-    return hutan_mangrove() / pertanian_lahan_basah_minimum()
+def hutan_mangrove_ratio():
+    return hutan_mangrove() / hutan_mangrove_minimum()
 
 
 @component.add(
-    name="Tambak Ratio",
+    name="Pertanian Ratio",
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"pertanian": 1, "tambak_minimum": 1},
+    depends_on={"pertanian": 1, "pertanian_minimum": 1},
 )
-def tambak_ratio():
-    return pertanian() / tambak_minimum()
+def pertanian_ratio():
+    return pertanian() / pertanian_minimum()
 
 
 @component.add(
@@ -6178,59 +6259,6 @@ _initial_lahan_terbangun_init = Initial(
 
 
 @component.add(
-    name="Minimum Fraction Lahan Lainnya",
-    units="Dmnl",
-    comp_type="Auxiliary",
-    comp_subtype="with Lookup",
-    depends_on={"time_index_0": 1},
-)
-def minimum_fraction_lahan_lainnya():
-    return np.interp(
-        time_index_0(),
-        [
-            2000.0,
-            2001.0,
-            2002.0,
-            2003.0,
-            2004.0,
-            2005.0,
-            2006.0,
-            2007.0,
-            2008.0,
-            2009.0,
-            2010.0,
-            2011.0,
-            2012.0,
-            2013.0,
-            2014.0,
-            2015.0,
-            2016.0,
-            2017.0,
-        ],
-        [
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-            0.1,
-        ],
-    )
-
-
-@component.add(
     name="Belukar Padang Rumput Hist",
     units="Ha",
     comp_type="Auxiliary",
@@ -6240,8 +6268,8 @@ def minimum_fraction_lahan_lainnya():
 def belukar_padang_rumput_hist():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [4119530.0, 4129570.0, 3983760.0, 3963830.0, 3673600.0],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2421620.0, 2276500.0, 2294690.0, 2030690.0, 2014050.0, 1906820.0, 1905190.0],
     )
 
 
@@ -6255,8 +6283,8 @@ def belukar_padang_rumput_hist():
 def belukar_padang_rumput_ke_rawa_badan_air_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0116, 0.0036, 0.0, 0.000607, 0.00394],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.13e-03, 3.00e-04, 1.93e-03, 5.99e-05, 1.62e-03, 1.29e-04, 8.61e-04],
     )
 
 
@@ -6270,8 +6298,8 @@ def belukar_padang_rumput_ke_rawa_badan_air_share():
 def belukar_padang_rumput_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00033, 0.02713, 0.00456, 0.00037, 0.0081],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.008, 0.000555, 0.00334, 0.00119, 0.00356, 0.00118, 0.00297],
     )
 
 
@@ -6285,8 +6313,8 @@ def belukar_padang_rumput_ke_lahan_lainnya_share():
 def belukar_padang_rumput_ke_pertambangan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 8.59088e-07, 0.00000e00, 0.00000e00, 2.10000e-07],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000308, 0.00029, 0.000879, 0.000324, 0.000959, 0.000622, 0.000564],
     )
 
 
@@ -6300,8 +6328,8 @@ def belukar_padang_rumput_ke_pertambangan_share():
 def belukar_padang_rumput_to_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00581, 0.08, 0.0, 0.079, 0.04114],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00327, 0.000672, 0.0836, 0.0, 0.0602, 0.0, 0.0246],
     )
 
 
@@ -6315,8 +6343,8 @@ def belukar_padang_rumput_to_hutan_primer_sekunder_share():
 def belukar_padang_rumput_to_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00051, 0.0054, 0.00019, 0.00086, 0.00174],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2.850e-03, 8.440e-04, 3.040e-03, 1.370e-04, 4.030e-03, 2.867e-05, 1.820e-03],
     )
 
 
@@ -6330,8 +6358,8 @@ def belukar_padang_rumput_to_lahan_terbangun_share():
 def belukar_padang_rumput_to_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.001427, 0.006069, 0.000182, 0.000945, 0.00216],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2.65e-03, 2.52e-05, 2.11e-02, 1.40e-03, 9.26e-03, 0.00e00, 5.74e-03],
     )
 
 
@@ -6345,8 +6373,8 @@ def belukar_padang_rumput_to_perkebunan_share():
 def belukar_padang_rumput_to_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [4.126e-05, 6.500e-04, 0.000e00, 6.400e-03, 1.760e-03],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2.79e-05, 6.84e-06, 7.78e-04, 0.00e00, 1.25e-03, 0.00e00, 3.44e-04],
     )
 
 
@@ -6360,8 +6388,8 @@ def belukar_padang_rumput_to_hutan_mangrove_share():
 def belukar_padang_rumput_to_hutan_tanaman_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0e00, 0.0e00, 2.6e-04, 0.0e00, 6.0e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 1.40e-03, 6.08e-03, 0.00e00, 1.98e-05, 0.00e00, 1.25e-03],
     )
 
 
@@ -6375,8 +6403,8 @@ def belukar_padang_rumput_to_hutan_tanaman_share():
 def belukar_padang_rumput_to_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0015, 0.0131, 0.0011, 0.0137, 0.00734],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0681, 0.0131, 0.105, 0.0171, 0.0962, 0.00318, 0.0504],
     )
 
 
@@ -6390,8 +6418,8 @@ def belukar_padang_rumput_to_pertanian_share():
 def hutan_primer_sekunder_to_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [3.45041e-05, 2.50000e-04, 5.01957e-07, 7.25245e-05, 9.00000e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [9.31e-06, 5.52e-05, 1.32e-04, 0.00e00, 8.79e-05, 0.00e00, 4.74e-05],
     )
 
 
@@ -6405,8 +6433,8 @@ def hutan_primer_sekunder_to_lahan_terbangun_share():
 def hutan_primer_sekunder_to_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0023, 0.00312, 0.00015, 0.00133, 0.00172],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00373, 0.00349, 0.00531, 0.000678, 0.00765, 0.000284, 0.00352],
     )
 
 
@@ -6420,8 +6448,8 @@ def hutan_primer_sekunder_to_belukar_padang_rumput_share():
 def hutan_primer_sekunder_to_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [5.40000e-04, 1.26000e-03, 5.32135e-05, 3.38000e-04, 5.50000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.20e-04, 2.40e-04, 6.91e-04, 1.89e-06, 2.73e-04, 5.81e-07, 2.21e-04],
     )
 
 
@@ -6435,8 +6463,8 @@ def hutan_primer_sekunder_to_perkebunan_share():
 def hutan_primer_sekunder_to_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [5.58701e-05, 9.56000e-04, 5.62298e-08, 2.41000e-03, 8.60000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [5.74e-05, 1.72e-08, 1.13e-04, 0.00e00, 1.96e-04, 0.00e00, 6.09e-05],
     )
 
 
@@ -6450,8 +6478,8 @@ def hutan_primer_sekunder_to_hutan_mangrove_share():
 def hutan_primer_sekunder_to_hutan_tanaman_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 0.00000e00, 3.61352e-05, 0.00000e00, 9.00000e-06],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0, 0.0, 0.000465, 0.000308, 0.000941, 0.0, 0.000286],
     )
 
 
@@ -6465,8 +6493,8 @@ def hutan_primer_sekunder_to_hutan_tanaman_share():
 def hutan_primer_sekunder_to_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [6.60000e-04, 1.45000e-03, 2.46035e-05, 1.07000e-03, 8.00000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [7.62e-04, 1.99e-03, 6.36e-03, 7.30e-05, 9.84e-03, 3.00e-04, 3.22e-03],
     )
 
 
@@ -6480,8 +6508,8 @@ def hutan_primer_sekunder_to_pertanian_share():
 def rawa_badan_air_ke_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.000467, 0.0165, 0.0, 0.00636, 0.00583],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.00e-05, 3.42e-05, 9.08e-04, 0.00e00, 1.68e-03, 0.00e00, 4.38e-04],
     )
 
 
@@ -6495,8 +6523,8 @@ def rawa_badan_air_ke_hutan_primer_sekunder_share():
 def rawa_badan_air_ke_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 7.26000e-04, 0.00000e00, 6.77478e-06, 1.80000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [9.87e-04, 7.83e-06, 2.06e-03, 0.00e00, 2.04e-03, 0.00e00, 8.48e-04],
     )
 
 
@@ -6510,8 +6538,8 @@ def rawa_badan_air_ke_lahan_terbangun_share():
 def rawa_badan_air_ke_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [9.7100e-03, 7.8360e-02, 1.1402e-05, 5.7700e-03, 2.3460e-02],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.64e-03, 5.43e-04, 2.10e-03, 3.72e-05, 2.31e-03, 0.00e00, 1.10e-03],
     )
 
 
@@ -6525,8 +6553,8 @@ def rawa_badan_air_ke_belukar_padang_rumput_share():
 def perkebunan_hist():
     return np.interp(
         time_index(),
-        [2016, 2017, 2018, 2019, 2020],
-        [179823, 217066, 298228, 302453, 314124],
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [466049, 454661, 456296, 616731, 626174, 667922, 669430],
     )
 
 
@@ -6540,8 +6568,8 @@ def perkebunan_hist():
 def perkebunan_ke_rawa_badan_air_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [2.47187e-05, 3.04000e-04, 0.00000e00, 1.26000e-03, 4.00000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [8.79e-04, 4.62e-04, 2.31e-03, 0.00e00, 1.68e-03, 2.51e-05, 8.93e-04],
     )
 
 
@@ -6555,8 +6583,8 @@ def perkebunan_ke_rawa_badan_air_share():
 def perkebunan_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00482, 0.00162, 0.01258, 0.00057, 0.0049],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.47e-03, 4.86e-05, 2.08e-03, 0.00e00, 6.31e-04, 5.40e-05, 7.14e-04],
     )
 
 
@@ -6568,7 +6596,11 @@ def perkebunan_ke_lahan_lainnya_share():
     depends_on={"time_index": 1},
 )
 def perkebunan_ke_pertambangan_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 3.14e-05, 9.73e-05, 3.32e-05, 1.18e-04, 5.30e-05, 5.55e-05],
+    )
 
 
 @component.add(
@@ -6581,8 +6613,8 @@ def perkebunan_ke_pertambangan_share():
 def perkebunan_to_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0184, 0.0136, 0.0, 0.0419, 0.01847],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [4.69e-07, 1.23e-10, 2.59e-03, 0.00e00, 2.24e-03, 0.00e00, 8.05e-04],
     )
 
 
@@ -6596,8 +6628,8 @@ def perkebunan_to_hutan_primer_sekunder_share():
 def perkebunan_to_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00104, 0.00203, 0.0, 0.00124, 0.00108],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00746, 0.000111, 0.00653, 0.000209, 0.00416, 0.0, 0.00308],
     )
 
 
@@ -6611,8 +6643,8 @@ def perkebunan_to_lahan_terbangun_share():
 def perkebunan_to_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [6.22000e-03, 1.35000e-03, 3.22673e-05, 1.06000e-02, 4.56000e-03],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [6.22e-03, 1.31e-07, 6.19e-03, 9.37e-05, 1.60e-03, 2.45e-05, 2.35e-03],
     )
 
 
@@ -6626,8 +6658,8 @@ def perkebunan_to_belukar_padang_rumput_share():
 def perkebunan_to_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0000e00, 1.6200e-04, 0.0000e00, 8.2513e-07, 4.0000e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2.13e-05, 0.00e00, 2.41e-04, 0.00e00, 9.64e-04, 0.00e00, 2.05e-04],
     )
 
 
@@ -6641,8 +6673,8 @@ def perkebunan_to_hutan_mangrove_share():
 def perkebunan_to_hutan_tanamang_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 0.00000e00, 0.00000e00, 7.10015e-05, 2.00000e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 0.00e00, 6.11e-08, 0.00e00, 0.00e00, 0.00e00, 1.02e-08],
     )
 
 
@@ -6656,8 +6688,8 @@ def perkebunan_to_hutan_tanamang_share():
 def perkebunan_to_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00029, 0.01715, 0.00047, 0.00503, 0.00573],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0748, 0.00103, 0.0748, 0.00117, 0.0403, 0.000117, 0.032],
     )
 
 
@@ -6670,7 +6702,9 @@ def perkebunan_to_pertanian_share():
 )
 def pertambangan_hist():
     return np.interp(
-        time_index(), [2016, 2017, 2018, 2019, 2020], [6216, 5752, 5536, 5415, 5103]
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [15328.0, 19641.1, 28185.6, 32812.3, 36094.4, 40615.8, 44512.9],
     )
 
 
@@ -6684,8 +6718,8 @@ def pertambangan_hist():
 def pertambangan_ke_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.00396, 0.0, 0.0791, 0.02076],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.09e-05, 0.00e00, 4.70e-03, 0.00e00, 3.73e-03, 0.00e00, 1.41e-03],
     )
 
 
@@ -6697,7 +6731,11 @@ def pertambangan_ke_hutan_primer_sekunder_share():
     depends_on={"time_index": 1},
 )
 def pertambangan_ke_rawa_badan_air_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0, 0.0, 0.000431, 0.0, 0.00108, 0.0, 0.000251],
+    )
 
 
 @component.add(
@@ -6710,8 +6748,8 @@ def pertambangan_ke_rawa_badan_air_share():
 def pertambangan_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 3.31000e-02, 2.18000e-02, 9.54421e-05, 1.37600e-02],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000549, 0.002, 0.00405, 0.0, 0.00101, 0.0, 0.00127],
     )
 
 
@@ -6725,8 +6763,8 @@ def pertambangan_ke_lahan_lainnya_share():
 def pertambangan_ke_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.0511, 0.0, 0.0028, 0.01348],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00104, 0.0, 0.00191, 0.0, 0.0573, 0.0, 0.01],
     )
 
 
@@ -6740,8 +6778,8 @@ def pertambangan_ke_lahan_terbangun_share():
 def hutan_primer_sekunder_ke_rawa_badan_air_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [4.5962e-05, 4.0600e-04, 0.0000e00, 3.9700e-04, 2.1000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2.14e-05, 8.18e-05, 2.51e-04, 0.00e00, 7.73e-05, 0.00e00, 7.19e-05],
     )
 
 
@@ -6755,8 +6793,8 @@ def hutan_primer_sekunder_ke_rawa_badan_air_share():
 def hutan_primer_sekunder_ke_pertambangan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [7.43038e-07, 8.16049e-06, 0.00000e00, 2.32131e-06, 2.80000e-06],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [3.45e-06, 1.59e-04, 2.14e-04, 2.06e-04, 2.87e-04, 1.90e-04, 1.77e-04],
     )
 
 
@@ -6770,8 +6808,8 @@ def hutan_primer_sekunder_ke_pertambangan_share():
 def hutan_primer_sekunder_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [2.61000e-04, 3.35000e-04, 2.98000e-04, 5.42904e-05, 2.40000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000505, 0.000422, 0.00127, 0.000662, 0.000915, 0.000265, 0.000674],
     )
 
 
@@ -6785,8 +6823,8 @@ def hutan_primer_sekunder_ke_lahan_lainnya_share():
 def lahan_lainnya_ke_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0012, 0.0067, 0.001, 0.0055, 0.00362],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0122, 0.0154, 0.0889, 0.0291, 0.0892, 0.0148, 0.0416],
     )
 
 
@@ -6798,7 +6836,11 @@ def lahan_lainnya_ke_pertanian_share():
     depends_on={"time_index": 1},
 )
 def pertanian_to_hutan_tanaman_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 1.41e-04, 2.07e-04, 1.22e-04, 8.64e-05, 0.00e00, 9.28e-05],
+    )
 
 
 @component.add(
@@ -6811,8 +6853,8 @@ def pertanian_to_hutan_tanaman_share():
 def pertambangan_ke_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.01822, 0.00023, 0.0, 0.0127, 0.00778],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.03e-03, 9.74e-08, 1.35e-02, 0.00e00, 2.44e-02, 0.00e00, 6.50e-03],
     )
 
 
@@ -6826,8 +6868,8 @@ def pertambangan_ke_pertanian_share():
 def lahan_terbangun_hist():
     return np.interp(
         time_index(),
-        [2016, 2017, 2018, 2019, 2020],
-        [149968, 154652, 191382, 193236, 181211],
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [184811, 232054, 240275, 300801, 302718, 364345, 364859],
     )
 
 
@@ -6841,8 +6883,8 @@ def lahan_terbangun_hist():
 def lahan_terbangun_ke_rawa_badan_air_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.00075, 0.0, 0.000289, 0.00026],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000581, 0.000182, 0.00384, 0.0, 0.000869, 0.0, 0.000912],
     )
 
 
@@ -6856,8 +6898,8 @@ def lahan_terbangun_ke_rawa_badan_air_share():
 def lahan_terbangun_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.001685, 0.000633, 0.000332, 0.00066],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [6.85e-05, 5.30e-04, 8.36e-04, 0.00e00, 6.25e-04, 0.00e00, 3.43e-04],
     )
 
 
@@ -6871,8 +6913,8 @@ def lahan_terbangun_ke_lahan_lainnya_share():
 def lahan_terbangun_ke_pertambangan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 2.30677e-05, 0.00000e00, 1.60994e-05, 1.00000e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [6.42e-05, 7.10e-07, 8.16e-04, 0.00e00, 6.54e-05, 0.00e00, 1.58e-04],
     )
 
 
@@ -6886,8 +6928,8 @@ def lahan_terbangun_ke_pertambangan_share():
 def rawa_badan_air_ke_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.000261, 0.0, 0.000186, 0.00011],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2.16e-03, 4.05e-06, 1.04e-03, 0.00e00, 1.92e-03, 0.00e00, 8.53e-04],
     )
 
 
@@ -6899,7 +6941,11 @@ def rawa_badan_air_ke_perkebunan_share():
     depends_on={"time_index": 1},
 )
 def rawa_badan_air_ke_pertambangan_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 5.88e-13, 4.05e-04, 0.00e00, 3.52e-04, 0.00e00, 1.26e-04],
+    )
 
 
 @component.add(
@@ -6912,8 +6958,8 @@ def rawa_badan_air_ke_pertambangan_share():
 def rawa_badan_air_ke_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00014, 0.00251, 0.0, 0.00109, 0.00093],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [3.08e-05, 8.22e-05, 4.02e-03, 5.93e-05, 1.83e-02, 0.00e00, 3.75e-03],
     )
 
 
@@ -6925,7 +6971,11 @@ def rawa_badan_air_ke_hutan_mangrove_share():
     depends_on={"time_index": 1},
 )
 def rawa_badan_air_ke_hutan_tanaman_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 0.00e00, 0.00e00, 0.00e00, 2.42e-07, 0.00e00, 4.04e-08],
+    )
 
 
 @component.add(
@@ -6938,8 +6988,8 @@ def rawa_badan_air_ke_hutan_tanaman_share():
 def rawa_badan_air_ke_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.00628, 0.0, 0.000419, 0.00168],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [5.10e-03, 1.85e-03, 1.63e-02, 0.00e00, 1.13e-02, 1.18e-05, 5.76e-03],
     )
 
 
@@ -6953,8 +7003,8 @@ def rawa_badan_air_ke_pertanian_share():
 def rawa_badan_air_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [7.6244e-05, 3.6300e-03, 1.5000e-03, 0.0000e00, 1.3000e-03],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.07e-04, 0.00e00, 1.75e-04, 0.00e00, 2.57e-04, 3.75e-06, 9.03e-05],
     )
 
 
@@ -6968,8 +7018,8 @@ def rawa_badan_air_ke_lahan_lainnya_share():
 def hutan_primer_sekunder_hist():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [32646400.0, 32559700.0, 32740400.0, 32721900.0, 32946700.0],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [9096340.0, 9061850.0, 9008060.0, 9118650.0, 9101060.0, 9111680.0, 9102210.0],
     )
 
 
@@ -6981,7 +7031,9 @@ def hutan_primer_sekunder_hist():
     depends_on={"time_index": 1},
 )
 def hutan_tanaman_ke_pertambangan_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(), [2016, 2017, 2018, 2019, 2020, 2021, 2022], [0, 0, 0, 0, 0, 0, 0]
+    )
 
 
 @component.add(
@@ -6994,8 +7046,8 @@ def hutan_tanaman_ke_pertambangan_share():
 def hutan_tanaman_to_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.0, 0.0, 0.413, 0.10323],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0826, 0.0, 0.000218, 0.0, 0.0638, 0.0, 0.0244],
     )
 
 
@@ -7007,7 +7059,11 @@ def hutan_tanaman_to_hutan_primer_sekunder_share():
     depends_on={"time_index": 1},
 )
 def hutan_tanaman_to_lahan_terbangun_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0, 0.0, 0.000719, 0.0, 0.000138, 0.0, 0.000143],
+    )
 
 
 @component.add(
@@ -7020,8 +7076,8 @@ def hutan_tanaman_to_lahan_terbangun_share():
 def hutan_tanaman_to_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.156, 0.0, 0.0937, 0.06242],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00658, 0.0, 0.00729, 0.0, 0.00503, 0.0, 0.00315],
     )
 
 
@@ -7033,7 +7089,11 @@ def hutan_tanaman_to_belukar_padang_rumput_share():
     depends_on={"time_index": 1},
 )
 def hutan_tanaman_to_perkebunan_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0, 0.0, 0.00346, 0.0, 0.00508, 0.0, 0.00142],
+    )
 
 
 @component.add(
@@ -7044,7 +7104,11 @@ def hutan_tanaman_to_perkebunan_share():
     depends_on={"time_index": 1},
 )
 def hutan_tanaman_to_hutan_mangrove_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0, 0.0, 0.000666, 0.0, 0.0, 0.0, 0.000111],
+    )
 
 
 @component.add(
@@ -7055,7 +7119,11 @@ def hutan_tanaman_to_hutan_mangrove_share():
     depends_on={"time_index": 1},
 )
 def hutan_tanaman_to_pertanian_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00123, 0.000238, 0.139, 0.0188, 0.0263, 0.0, 0.0309],
+    )
 
 
 @component.add(
@@ -7068,8 +7136,8 @@ def hutan_tanaman_to_pertanian_share():
 def lahan_lainnya_ke_rawa_badan_air_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.013966, 0.007328, 0.0, 0.00697, 0.00706],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00902, 0.0116, 0.0175, 0.000851, 0.00974, 0.00139, 0.00835],
     )
 
 
@@ -7083,8 +7151,8 @@ def lahan_lainnya_ke_rawa_badan_air_share():
 def lahan_lainnya_ke_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0219, 0.02, 0.0, 0.0155, 0.01436],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000587, 0.000129, 0.0151, 0.0, 0.0271, 0.0, 0.00716],
     )
 
 
@@ -7098,8 +7166,8 @@ def lahan_lainnya_ke_hutan_primer_sekunder_share():
 def lahan_lainnya_ke_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0004, 0.0041, 0.0, 0.00095, 0.00137],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00105, 0.00199, 0.0051, 0.0, 0.0085, 0.000627, 0.00288],
     )
 
 
@@ -7113,8 +7181,8 @@ def lahan_lainnya_ke_lahan_terbangun_share():
 def lahan_lainnya_ke_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [1.00000e-02, 3.31000e-01, 4.85898e-05, 1.07000e-01, 1.12190e-01],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0406, 0.0641, 0.381, 0.0178, 0.643, 0.0622, 0.201],
     )
 
 
@@ -7128,8 +7196,8 @@ def lahan_lainnya_ke_belukar_padang_rumput_share():
 def lahan_lainnya_ke_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0312, 0.0387, 0.0112, 0.0259, 0.02677],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00959, 0.000115, 0.0244, 0.00725, 0.033, 0.0, 0.0124],
     )
 
 
@@ -7143,8 +7211,8 @@ def lahan_lainnya_ke_perkebunan_share():
 def lahan_lainnya_ke_pertambangan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.0, 0.0, 0.000455, 0.00011],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.018, 0.0111, 0.0229, 0.000839, 0.0135, 0.00249, 0.0115],
     )
 
 
@@ -7158,8 +7226,8 @@ def lahan_lainnya_ke_pertambangan_share():
 def lahan_lainnya_ke_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.000213, 0.000213, 0.0, 0.000711, 0.00028],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [9.51e-05, 1.35e-06, 8.81e-04, 0.00e00, 5.42e-04, 0.00e00, 2.53e-04],
     )
 
 
@@ -7173,8 +7241,8 @@ def lahan_lainnya_ke_hutan_mangrove_share():
 def lahan_lainnya_ke_hutan_tanamang_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 0.00000e00, 0.00000e00, 3.69816e-05, 1.00000e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [4.43e-05, 0.00e00, 2.76e-03, 0.00e00, 3.97e-05, 0.00e00, 4.74e-04],
     )
 
 
@@ -7188,8 +7256,8 @@ def lahan_lainnya_ke_hutan_tanamang_share():
 def pertambangan_ke_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0607, 0.0, 0.0, 0.0, 0.01518],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 5.86e-10, 5.46e-03, 0.00e00, 3.06e-03, 0.00e00, 1.42e-03],
     )
 
 
@@ -7203,8 +7271,8 @@ def pertambangan_ke_perkebunan_share():
 def pertambangan_ke_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.00132, 0.0, 0.0114, 0.00318],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 0.00e00, 0.00e00, 0.00e00, 4.72e-04, 0.00e00, 7.87e-05],
     )
 
 
@@ -7216,7 +7284,9 @@ def pertambangan_ke_hutan_mangrove_share():
     depends_on={"time_index": 1},
 )
 def pertambangan_ke_hutan_tanaman_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(), [2016, 2017, 2018, 2019, 2020, 2021, 2022], [0, 0, 0, 0, 0, 0, 0]
+    )
 
 
 @component.add(
@@ -7229,8 +7299,8 @@ def pertambangan_ke_hutan_tanaman_share():
 def pertanian_to_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [1.99246e-06, 1.99000e-04, 0.00000e00, 8.86892e-05, 7.00000e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [2.60e-05, 2.08e-07, 5.58e-04, 0.00e00, 1.09e-03, 0.00e00, 2.78e-04],
     )
 
 
@@ -7244,8 +7314,8 @@ def pertanian_to_hutan_mangrove_share():
 def lahan_terbangun_to_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00082, 0.00705, 0.0, 0.0086, 0.00412],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [8.37e-04, 1.25e-09, 1.01e-02, 0.00e00, 3.69e-03, 0.00e00, 2.44e-03],
     )
 
 
@@ -7259,8 +7329,8 @@ def lahan_terbangun_to_perkebunan_share():
 def hutan_mangrove_hist():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [1311570.0, 1312700.0, 1340090.0, 1339800.0, 1428140.0],
+        [2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        [171387, 169184, 157459, 148172, 147502, 158407, 156008],
     )
 
 
@@ -7274,8 +7344,8 @@ def hutan_mangrove_hist():
 def hutan_mangrove_ke_rawa_badan_air_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00017, 0.00258, 0.0, 0.000673, 0.00085],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00957, 0.0468, 0.0796, 0.00274, 0.024, 0.014, 0.0295],
     )
 
 
@@ -7289,8 +7359,8 @@ def hutan_mangrove_ke_rawa_badan_air_share():
 def hutan_mangrove_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.000213, 0.000197, 0.000213, 0.000226, 0.00021],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00125, 0.00391, 0.00245, 0.00194, 0.00429, 0.000585, 0.0024],
     )
 
 
@@ -7304,8 +7374,8 @@ def hutan_mangrove_ke_lahan_lainnya_share():
 def hutan_mangrove_ke_pertambangan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [2.15928e-06, 0.00000e00, 0.00000e00, 0.00000e00, 5.40000e-07],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 1.15e-04, 7.96e-05, 2.24e-05, 1.09e-04, 4.78e-04, 1.34e-04],
     )
 
 
@@ -7319,8 +7389,8 @@ def hutan_mangrove_ke_pertambangan_share():
 def lahan_terbangun_to_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.003, 0.0161, 0.0, 0.0165, 0.00888],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 8.29e-07, 1.20e-03, 0.00e00, 1.30e-04, 0.00e00, 2.21e-04],
     )
 
 
@@ -7334,8 +7404,8 @@ def lahan_terbangun_to_hutan_primer_sekunder_share():
 def lahan_terbangun_to_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0115, 0.0133, 0.0, 0.00396, 0.00719],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [8.94e-04, 2.62e-03, 1.16e-02, 0.00e00, 2.63e-03, 6.44e-05, 2.96e-03],
     )
 
 
@@ -7349,8 +7419,8 @@ def lahan_terbangun_to_belukar_padang_rumput_share():
 def pertanian_to_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00148, 0.00152, 0.00071, 0.00118, 0.00122],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [3.57e-03, 1.61e-07, 2.34e-02, 1.12e-03, 7.77e-03, 2.80e-04, 6.03e-03],
     )
 
 
@@ -7364,8 +7434,8 @@ def pertanian_to_perkebunan_share():
 def lahan_terbangun_to_hutan_mangrove_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.000275, 0.000398, 0.0, 0.000947, 0.0004],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [8.45e-05, 3.21e-06, 5.30e-04, 0.00e00, 6.25e-04, 0.00e00, 2.07e-04],
     )
 
 
@@ -7377,7 +7447,11 @@ def lahan_terbangun_to_hutan_mangrove_share():
     depends_on={"time_index": 1},
 )
 def lahan_terbangun_to_hutan_tanaman_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 0.00e00, 0.00e00, 0.00e00, 7.66e-06, 0.00e00, 1.28e-06],
+    )
 
 
 @component.add(
@@ -7390,8 +7464,8 @@ def lahan_terbangun_to_hutan_tanaman_share():
 def lahan_terbangun_to_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.004, 0.1556, 0.0004, 0.0848, 0.0612],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0134, 0.011, 0.0243, 0.0, 0.0108, 0.0, 0.00993],
     )
 
 
@@ -7404,7 +7478,9 @@ def lahan_terbangun_to_pertanian_share():
 )
 def hutan_tanaman_hist():
     return np.interp(
-        time_index(), [2016, 2017, 2018, 2019, 2020], [1879, 1879, 1586, 3799, 1913]
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [16704.2, 15396.5, 19431.9, 36258.5, 39111.1, 44317.8, 44311.9],
     )
 
 
@@ -7416,7 +7492,11 @@ def hutan_tanaman_hist():
     depends_on={"time_index": 1},
 )
 def hutan_tanaman_ke_rawa_badan_air_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0, 0.0, 0.000659, 0.0, 0.0, 0.0, 0.00011],
+    )
 
 
 @component.add(
@@ -7429,8 +7509,8 @@ def hutan_tanaman_ke_rawa_badan_air_share():
 def hutan_tanaman_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.0, 0.0, 0.00237, 0.0, 0.00059],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0028, 0.0, 0.000704, 0.0, 0.0, 0.000134, 0.000606],
     )
 
 
@@ -7444,8 +7524,8 @@ def hutan_tanaman_ke_lahan_lainnya_share():
 def pertanian_hist():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [1056200.0, 1079440.0, 1095260.0, 1097590.0, 1146160.0],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [5898690.0, 6014810.0, 6034460.0, 5959260.0, 5972250.0, 6015600.0, 6017240.0],
     )
 
 
@@ -7459,8 +7539,8 @@ def pertanian_hist():
 def pertanian_ke_rawa_badan_air_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [2.17371e-06, 8.27000e-04, 0.00000e00, 7.41000e-04, 3.90000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [7.23e-04, 5.08e-04, 2.87e-03, 1.67e-05, 2.03e-03, 8.37e-06, 1.03e-03],
     )
 
 
@@ -7474,8 +7554,8 @@ def pertanian_ke_rawa_badan_air_share():
 def pertanian_ke_lahan_lainnya_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [5.84524e-05, 8.40000e-04, 1.24000e-03, 1.80000e-04, 5.80000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0013, 0.000364, 0.00455, 0.000225, 0.000656, 0.000322, 0.00123],
     )
 
 
@@ -7489,8 +7569,8 @@ def pertanian_ke_lahan_lainnya_share():
 def pertanian_ke_pertambangan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 2.58941e-05, 0.00000e00, 1.18302e-05, 1.00000e-05],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000206, 0.000789, 0.000337, 0.000105, 0.00043, 0.000155, 0.000337],
     )
 
 
@@ -7504,8 +7584,8 @@ def pertanian_ke_pertambangan_share():
 def lahan_lainnya_hist():
     return np.interp(
         time_index(),
-        [2016, 2017, 2018, 2019, 2020],
-        [546973, 514855, 434646, 464768, 392852],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [136196.0, 156392.0, 148178.0, 113712.0, 117448.0, 41435.5, 44807.1],
     )
 
 
@@ -7519,8 +7599,8 @@ def lahan_lainnya_hist():
 def pertambangan_ke_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00000e00, 9.01644e-05, 0.00000e00, 7.60000e-03, 1.92000e-03],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00666, 0.00135, 0.153, 0.0, 0.032, 0.00412, 0.0329],
     )
 
 
@@ -7534,8 +7614,8 @@ def pertambangan_ke_belukar_padang_rumput_share():
 def pertanian_to_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00024, 0.0256, 0.0, 0.00645, 0.00807],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.0035, 0.00228, 0.0227, 0.00269, 0.0166, 0.000466, 0.00803],
     )
 
 
@@ -7549,8 +7629,8 @@ def pertanian_to_belukar_padang_rumput_share():
 def hutan_mangrove_to_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00024, 0.00194, 0.0, 0.011, 0.0033],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [1.56e-04, 4.27e-06, 9.32e-04, 0.00e00, 1.13e-03, 0.00e00, 3.71e-04],
     )
 
 
@@ -7564,8 +7644,8 @@ def hutan_mangrove_to_hutan_primer_sekunder_share():
 def hutan_mangrove_to_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [9.59279e-05, 5.09000e-04, 0.00000e00, 2.70000e-04, 2.20000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000145, 0.00134, 0.00317, 0.0, 0.00265, 0.0, 0.00122],
     )
 
 
@@ -7579,8 +7659,8 @@ def hutan_mangrove_to_lahan_terbangun_share():
 def hutan_mangrove_to_belukar_padang_rumput_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00015, 0.00196, 0.0, 0.001, 0.00078],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000587, 0.00753, 0.00903, 0.0, 0.00758, 0.0, 0.00412],
     )
 
 
@@ -7594,8 +7674,8 @@ def hutan_mangrove_to_belukar_padang_rumput_share():
 def pertanian_to_hutan_primer_sekunder_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.000134, 0.0584, 0.0, 0.0449, 0.02587],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00059, 0.000494, 0.00791, 0.0, 0.011, 0.0, 0.00333],
     )
 
 
@@ -7607,7 +7687,11 @@ def pertanian_to_hutan_primer_sekunder_share():
     depends_on={"time_index": 1},
 )
 def hutan_mangrove_to_hutan_tanamang_share():
-    return np.interp(time_index(), [2016, 2017, 2018, 2019], [0, 0, 0, 0])
+    return np.interp(
+        time_index(),
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.00e00, 0.00e00, 0.00e00, 0.00e00, 3.71e-05, 0.00e00, 6.19e-06],
+    )
 
 
 @component.add(
@@ -7620,8 +7704,8 @@ def hutan_mangrove_to_hutan_tanamang_share():
 def pertanian_to_lahan_terbangun_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [0.00366, 0.02968, 0.00117, 0.00301, 0.00938],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [6.64e-03, 1.42e-03, 9.94e-03, 2.54e-04, 8.64e-03, 7.60e-05, 4.50e-03],
     )
 
 
@@ -7635,8 +7719,8 @@ def pertanian_to_lahan_terbangun_share():
 def hutan_mangrove_to_perkebunan_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [1.90942e-05, 1.04045e-05, 0.00000e00, 4.80406e-06, 9.00000e-06],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [0.000208, 0.000894, 0.005763, 0.0, 0.00298, 0.0, 0.00164],
     )
 
 
@@ -7650,27 +7734,31 @@ def hutan_mangrove_to_perkebunan_share():
 def hutan_mangrove_to_pertanian_share():
     return np.interp(
         time_index(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0],
-        [3.34359e-05, 6.98000e-04, 0.00000e00, 1.17000e-04, 2.10000e-04],
+        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
+        [5.57e-03, 8.98e-03, 1.01e-02, 0.00e00, 1.73e-02, 9.26e-05, 7.01e-03],
     )
 
 
 @component.add(
-    name="IKU Bali",
+    name="IKU Pulau",
     units="Dmnl",
     comp_type="Stateful",
     comp_subtype="Integ",
-    depends_on={"_integ_iku_bali": 1},
-    other_deps={"_integ_iku_bali": {"initial": {}, "step": {"perubahan_iku_bali": 1}}},
+    depends_on={"_integ_iku_pulau": 1},
+    other_deps={
+        "_integ_iku_pulau": {"initial": {}, "step": {"perubahan_iku_pulau": 1}}
+    },
 )
-def iku_bali():
+def iku_pulau():
     """
     Interpolasi ke 2010
     """
-    return _integ_iku_bali()
+    return _integ_iku_pulau()
 
 
-_integ_iku_bali = Integ(lambda: perubahan_iku_bali(), lambda: 94.7, "_integ_iku_bali")
+_integ_iku_pulau = Integ(
+    lambda: perubahan_iku_pulau(), lambda: 94.7, "_integ_iku_pulau"
+)
 
 
 @component.add(
@@ -7777,18 +7865,18 @@ def jumlah_hari_per_musim_tanam():
 
 
 @component.add(
-    name="Perubahan IKU Bali",
+    name="Perubahan IKU Pulau",
     units="1/tahun",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "iku_bali": 1,
-        "elastisitas_perubahan_iku_bali": 1,
+        "iku_pulau": 1,
+        "elastisitas_perubahan_iku_pulau": 1,
         "laju_pdrb_per_kapita": 1,
     },
 )
-def perubahan_iku_bali():
-    return iku_bali() * elastisitas_perubahan_iku_bali() * laju_pdrb_per_kapita()
+def perubahan_iku_pulau():
+    return iku_pulau() * elastisitas_perubahan_iku_pulau() * laju_pdrb_per_kapita()
 
 
 @component.add(
@@ -7801,7 +7889,7 @@ def lahan_pangan_per_kapita():
     """
     data n.a.
     """
-    return 0.132
+    return 0.083
 
 
 @component.add(
@@ -7812,7 +7900,7 @@ def lahan_pangan_per_kapita():
     depends_on={"_integ_populasi_pulau": 1},
     other_deps={
         "_integ_populasi_pulau": {
-            "initial": {"populasi_historisprojeksi": 1},
+            "initial": {"populasi_historis": 1},
             "step": {"pertumbuhan_populasi": 1},
         }
     },
@@ -7822,9 +7910,7 @@ def populasi_pulau():
 
 
 _integ_populasi_pulau = Integ(
-    lambda: pertumbuhan_populasi(),
-    lambda: populasi_historisprojeksi(),
-    "_integ_populasi_pulau",
+    lambda: pertumbuhan_populasi(), lambda: populasi_historis(), "_integ_populasi_pulau"
 )
 
 
@@ -7863,13 +7949,13 @@ def rasio_kecukupan_air_falkenmark():
 
 
 @component.add(
-    name="Elastisitas perubahan IKU Bali",
+    name="Elastisitas perubahan IKU Pulau",
     units="Dmnl",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
     depends_on={"time": 1},
 )
-def elastisitas_perubahan_iku_bali():
+def elastisitas_perubahan_iku_pulau():
     return np.interp(
         time(),
         [2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
@@ -7886,22 +7972,22 @@ def elastisitas_perubahan_iku_bali():
 )
 def persentase_air_tercemar():
     """
-    dari proxy IKA 20192-2023
+    data belum tersedia
     """
     return np.interp(
         time(),
         [2019.0, 2020.0, 2021.0, 2022.0, 2023.0, 2045.0],
-        [0.00520311, 0.00520311, 0.00520311, 0.00520311, 0.00520311, 0.00520311],
+        [0.0623378, 0.0623378, 0.0623378, 0.0623378, 0.0623378, 0.0623378],
     )
 
 
 @component.add(
-    name='"std kebutuhan air per pertanian SK 146/2023"',
+    name='"debit per detik pertanian dasar SK 146/2023"',
     units="m*m*m/detik/Ha",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def std_kebutuhan_air_per_pertanian_sk_1462023():
+def debit_per_detik_pertanian_dasar_sk_1462023():
     return 0.001
 
 
@@ -7936,17 +8022,17 @@ def std_kebutuhan_air_per_kapita_sk_1462023():
     """
     SK MenLHK 146/2023
     """
-    return 43.2
+    return 42.3
 
 
 @component.add(
-    name="rasio air padi perkebunan",
+    name="koefisien I persawahan",
     units="Dmnl",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def rasio_air_padi_perkebunan():
-    return 4 / 1.5
+def koefisien_i_persawahan():
+    return 4
 
 
 @component.add(
@@ -7996,9 +8082,9 @@ _trend_laju_pdrb_per_kapita = Trend(
 )
 def supply_air_permukaan():
     """
-    PUPR 2016 yang digunakan untuk D3TLH Air Nasional 2009 dan 2023
+    Data Matra Air
     """
-    return 511617000000.0
+    return 122511000000.0
 
 
 @component.add(
@@ -8011,7 +8097,7 @@ def supply_air_permukaan():
         "konverter_jam_ke_hari": 1,
         "jumlah_hari_per_musim_tanam": 1,
         "intensitas_penanaman": 1,
-        "std_kebutuhan_air_per_pertanian_sk_1462023": 1,
+        "debit_per_detik_pertanian_dasar_sk_1462023": 1,
     },
 )
 def std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan():
@@ -8020,7 +8106,7 @@ def std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan():
         * konverter_jam_ke_hari()
         * jumlah_hari_per_musim_tanam()
         / intensitas_penanaman()
-        * std_kebutuhan_air_per_pertanian_sk_1462023()
+        * debit_per_detik_pertanian_dasar_sk_1462023()
     )
 
 
@@ -8031,7 +8117,7 @@ def std_kebutuhan_air_per_pertanian_dasar_sk_1462023_tahunan():
     comp_subtype="Normal",
 )
 def potensi_air_tanah():
-    return 221964000000.0
+    return 19694000000.0
 
 
 @component.add(
@@ -8517,8 +8603,38 @@ def angkatan_kerja_historis():
     """
     return np.interp(
         time(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
-        [2206980.0, 2193320.0, 2281590.0, 2263930.0, 2260250.0, 2466440.0, 2506470.0],
+        [
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+            2018.0,
+            2019.0,
+            2020.0,
+            2021.0,
+            2022.0,
+            2023.0,
+        ],
+        [
+            7375420.0,
+            7576080.0,
+            7728370.0,
+            7879350.0,
+            8161290.0,
+            8415840.0,
+            8864570.0,
+            8902790.0,
+            9205310.0,
+            9520780.0,
+            9649720.0,
+            9853980.0,
+            10107600.0,
+            10405900.0,
+        ],
     )
 
 
@@ -8551,11 +8667,10 @@ def capacity_utilization_factor():
             2021.0,
             2022.0,
             2023.0,
-            2024.0,
             2030.0,
             2035.0,
         ],
-        [1.0, 1.0, 1.0, 0.9, 0.91, 0.92, 0.94, 0.91, 0.92, 0.95, 0.97],
+        [1.0, 1.0, 1.0, 0.98, 0.93, 0.93, 0.93, 0.94, 1.0, 1.0],
     )
 
 
@@ -8620,7 +8735,9 @@ def elastisitas_lpe_thd_perubahan_teknologi_historis():
     """
     Asumsi jika pertumbuhan ekonomi naik 5% maka perubahan teknologi naik 3%
     """
-    return np.interp(time(), [2010.0, 2024.0, 2025.0, 2026.0], [0.35, 0.35, 0.35, 0.35])
+    return np.interp(
+        time(), [2010.0, 2024.0, 2025.0, 2026.0, 2030.0], [0.35, 0.35, 0.35, 0.35, 0.35]
+    )
 
 
 @component.add(
@@ -8665,7 +8782,7 @@ def intensitas_air_untuk_ekonomi():
     name="Intensitas kapital", units="Dmnl", comp_type="Constant", comp_subtype="Normal"
 )
 def intensitas_kapital():
-    return 0.3
+    return 0.5
 
 
 @component.add(
@@ -8717,20 +8834,20 @@ def investasi_historis():
             2023.0,
         ],
         [
-            31863100.0,
-            34424900.0,
-            36483700.0,
-            39813100.0,
-            44302400.0,
-            45533700.0,
-            48296500.0,
-            50623000.0,
-            53710300.0,
-            55875000.0,
-            54699100.0,
-            58843700.0,
-            59002700.0,
-            55589600.0,
+            1.26225e08,
+            1.40615e08,
+            1.55897e08,
+            1.70228e08,
+            1.86423e08,
+            2.02570e08,
+            2.19487e08,
+            2.34872e08,
+            2.45883e08,
+            2.65806e08,
+            2.60399e08,
+            2.95542e08,
+            3.17394e08,
+            2.92183e08,
         ],
     )
 
@@ -8772,10 +8889,10 @@ _integ_kapital = Integ(
     units="JutaRp",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"pdrb_provinsi_awal": 1, "asumsi_kor_awal": 1},
+    depends_on={"pdrb_pulau_awal": 1, "asumsi_kor_awal": 1},
 )
 def kapital_awal():
-    return pdrb_provinsi_awal() * asumsi_kor_awal()
+    return pdrb_pulau_awal() * asumsi_kor_awal()
 
 
 @component.add(
@@ -8785,15 +8902,13 @@ def kapital_awal():
     comp_subtype="Normal",
     depends_on={
         "intensitas_kapital": 1,
-        "target_pdrb_provinsi": 1,
-        "umur_kapital_rata2": 1,
+        "target_pdrb_pulau": 1,
         "r": 1,
+        "umur_kapital_rata2": 1,
     },
 )
 def kapital_dibutuhkan():
-    return (
-        intensitas_kapital() * target_pdrb_provinsi() / (1 / umur_kapital_rata2() + r())
-    )
+    return intensitas_kapital() * target_pdrb_pulau() / (1 / umur_kapital_rata2() + r())
 
 
 @component.add(
@@ -8887,12 +9002,10 @@ def kor():
     units="1/tahun",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"laju_pertumbuhan_populasi_table": 1, "satu_tahun_unit": 1, "time": 1},
+    depends_on={"time": 1, "satu_tahun_unit": 1, "laju_pertumbuhan_populasi_table": 1},
 )
-
 def laju_pertumbuhan_populasi():
-    current_time = time() / satu_tahun_unit()
-    return laju_pertumbuhan_populasi_table(current_time)
+    return laju_pertumbuhan_populasi_table(time() / satu_tahun_unit())
 
 
 @component.add(
@@ -8907,8 +9020,17 @@ def laju_pertumbuhan_populasi_table(x, final_subs=None):
 
 
 _hardcodedlookup_laju_pertumbuhan_populasi_table = HardcodedLookups(
-    [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0, 2030.0],
-    [0.0380765, 0.0380833, 0.0380968, 0.0413369, 0.0151868, 0.0149946, 0.014652, 0.03],
+    [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0, 2023.0],
+    [
+        0.0154017,
+        0.0152597,
+        0.015106,
+        0.0130924,
+        0.0143075,
+        0.0143106,
+        0.0142437,
+        0.0151378,
+    ],
     {},
     "interpolate",
     {},
@@ -8935,11 +9057,11 @@ def liter_ke_meter_kubik():
     other_deps={
         "_trend_lpe_pulau": {
             "initial": {
-                "lpe_provinsi_mulamula": 1,
+                "lpe_pulau_mulamula": 1,
                 "pdrb_pulau": 1,
-                "waktu_trend_lpe_provinsi": 1,
+                "waktu_trend_lpe_pulau": 1,
             },
-            "step": {"pdrb_pulau": 1, "waktu_trend_lpe_provinsi": 1},
+            "step": {"pdrb_pulau": 1, "waktu_trend_lpe_pulau": 1},
         }
     },
 )
@@ -8949,8 +9071,8 @@ def lpe_pulau():
 
 _trend_lpe_pulau = Trend(
     lambda: pdrb_pulau(),
-    lambda: waktu_trend_lpe_provinsi(),
-    lambda: lpe_provinsi_mulamula(),
+    lambda: waktu_trend_lpe_pulau(),
+    lambda: lpe_pulau_mulamula(),
     "_trend_lpe_pulau",
 )
 
@@ -8964,11 +9086,11 @@ _trend_lpe_pulau = Trend(
     other_deps={
         "_trend_lpe_provinsi_historis": {
             "initial": {
-                "lpe_provinsi_mulamula": 1,
-                "pdrb_provinsi_historis": 1,
-                "waktu_trend_lpe_provinsi": 1,
+                "lpe_pulau_mulamula": 1,
+                "pdrb_pulau_historis": 1,
+                "waktu_trend_lpe_pulau": 1,
             },
-            "step": {"pdrb_provinsi_historis": 1, "waktu_trend_lpe_provinsi": 1},
+            "step": {"pdrb_pulau_historis": 1, "waktu_trend_lpe_pulau": 1},
         }
     },
 )
@@ -8977,20 +9099,20 @@ def lpe_provinsi_historis():
 
 
 _trend_lpe_provinsi_historis = Trend(
-    lambda: pdrb_provinsi_historis(),
-    lambda: waktu_trend_lpe_provinsi(),
-    lambda: lpe_provinsi_mulamula(),
+    lambda: pdrb_pulau_historis(),
+    lambda: waktu_trend_lpe_pulau(),
+    lambda: lpe_pulau_mulamula(),
     "_trend_lpe_provinsi_historis",
 )
 
 
 @component.add(
-    name='"LPE provinsi Mula-mula"',
+    name='"LPE Pulau Mula-mula"',
     units="1/tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def lpe_provinsi_mulamula():
+def lpe_pulau_mulamula():
     return 0.05
 
 
@@ -9022,63 +9144,58 @@ def mps():
             2021.0,
             2022.0,
             2023.0,
-            2024.0,
             2030.0,
         ],
         [
-            0.209,
-            0.231,
-            0.24,
-            0.242,
-            0.247,
-            0.249,
-            0.245,
-            0.255,
-            0.265,
-            0.27,
-            0.27,
-            0.288,
-            0.278,
-            0.25,
-            0.25,
-            0.3,
+            0.354,
+            0.364,
+            0.37,
+            0.375,
+            0.384,
+            0.386,
+            0.389,
+            0.42,
+            0.42,
+            0.43,
+            0.395,
+            0.43,
+            0.445,
+            0.38,
+            0.4,
         ],
     )
 
 
 @component.add(
-    name="PDRB Provinsi awal",
+    name="PDRB Pulau awal",
     units="JutaRp/tahun",
     comp_type="Stateful",
     comp_subtype="Initial",
-    depends_on={"_initial_pdrb_provinsi_awal": 1},
+    depends_on={"_initial_pdrb_pulau_awal": 1},
     other_deps={
-        "_initial_pdrb_provinsi_awal": {
-            "initial": {"pdrb_provinsi_historis": 1},
-            "step": {},
-        }
+        "_initial_pdrb_pulau_awal": {"initial": {"pdrb_pulau_historis": 1}, "step": {}}
     },
 )
-def pdrb_provinsi_awal():
+def pdrb_pulau_awal():
     """
     PDRB ADHK Bali 2010
     """
-    return _initial_pdrb_provinsi_awal()
+    return _initial_pdrb_pulau_awal()
 
 
-_initial_pdrb_provinsi_awal = Initial(
-    lambda: pdrb_provinsi_historis(), "_initial_pdrb_provinsi_awal"
+_initial_pdrb_pulau_awal = Initial(
+    lambda: pdrb_pulau_historis(), "_initial_pdrb_pulau_awal"
 )
 
 
 @component.add(
-    name="PDRB Provinsi historis",
+    name="PDRB Pulau historis",
     units="JutaRp/tahun",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
     depends_on={"time": 1},
 )
-def pdrb_provinsi_historis():
+def pdrb_pulau_historis():
     return np.interp(
         time(),
         [
@@ -9098,45 +9215,45 @@ def pdrb_provinsi_historis():
             2023.0,
         ],
         [
-            1.52170e08,
-            1.48934e08,
-            1.52314e08,
-            1.64813e08,
-            1.79572e08,
-            1.82658e08,
-            1.96936e08,
-            2.05726e08,
-            2.20177e08,
-            1.96640e08,
-            1.99391e08,
-            2.19965e08,
-            2.35426e08,
-            2.32262e08,
+            3.56406e08,
+            3.86781e08,
+            4.21738e08,
+            4.54175e08,
+            4.85436e08,
+            5.25213e08,
+            5.64226e08,
+            6.03535e08,
+            6.57820e08,
+            7.03084e08,
+            7.04597e08,
+            7.44839e08,
+            7.97654e08,
+            8.47727e08,
         ],
     )
 
 
 @component.add(
-    name="PDRB Provinsi rerata",
+    name="PDRB Pulau rerata",
     units="JutaRp/tahun",
     comp_type="Stateful",
     comp_subtype="Integ",
-    depends_on={"_integ_pdrb_provinsi_rerata": 1},
+    depends_on={"_integ_pdrb_pulau_rerata": 1},
     other_deps={
-        "_integ_pdrb_provinsi_rerata": {
-            "initial": {"pdrb_provinsi_awal": 1},
-            "step": {"perubahan_pdrb_provinsi_rerata": 1},
+        "_integ_pdrb_pulau_rerata": {
+            "initial": {"pdrb_pulau_awal": 1},
+            "step": {"perubahan_pdrb_pulau_rerata": 1},
         }
     },
 )
-def pdrb_provinsi_rerata():
-    return _integ_pdrb_provinsi_rerata()
+def pdrb_pulau_rerata():
+    return _integ_pdrb_pulau_rerata()
 
 
-_integ_pdrb_provinsi_rerata = Integ(
-    lambda: perubahan_pdrb_provinsi_rerata(),
-    lambda: pdrb_provinsi_awal(),
-    "_integ_pdrb_provinsi_rerata",
+_integ_pdrb_pulau_rerata = Integ(
+    lambda: perubahan_pdrb_pulau_rerata(),
+    lambda: pdrb_pulau_awal(),
+    "_integ_pdrb_pulau_rerata",
 )
 
 
@@ -9256,54 +9373,39 @@ _hardcodedlookup_tk_pengangguran_historisprojeksi_table = HardcodedLookups(
 
 
 @component.add(
-    name="Perubahan PDRB Provinsi rerata",
+    name="Perubahan PDRB Pulau rerata",
     units="miliarRp/(tahun*tahun)",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "pdrb_pulau": 1,
-        "pdrb_provinsi_rerata": 1,
-        "waktu_meratakan_pdrb_provinsi": 1,
+        "pdrb_pulau_rerata": 1,
+        "waktu_meratakan_pdrb_pulau": 1,
     },
 )
-def perubahan_pdrb_provinsi_rerata():
-    return (pdrb_pulau() - pdrb_provinsi_rerata()) / waktu_meratakan_pdrb_provinsi()
+def perubahan_pdrb_pulau_rerata():
+    return (pdrb_pulau() - pdrb_pulau_rerata()) / waktu_meratakan_pdrb_pulau()
 
 
 @component.add(
-    name="Perubahan PDRB Provinsi target",
+    name="Perubahan PDRB Pulau target",
     units="miliarRp/(tahun*tahun)",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"pdrb_provinsi_rerata": 1, "target_lpe_provinsi": 1},
+    depends_on={"pdrb_pulau_rerata": 1, "target_lpe_pulau": 1},
 )
-def perubahan_pdrb_provinsi_target():
-    return pdrb_provinsi_rerata() * target_lpe_provinsi()
+def perubahan_pdrb_pulau_target():
+    return pdrb_pulau_rerata() * target_lpe_pulau()
 
 
 @component.add(
-    name="Perubahan tk teknologi",
-    units="1/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "lpe_pulau": 1,
-        "elastisitas_lpe_thd_perubahan_teknologi": 1,
-        "tingkat_teknologi": 1,
-    },
-)
-def perubahan_tk_teknologi():
-    return lpe_pulau() * elastisitas_lpe_thd_perubahan_teknologi() * tingkat_teknologi()
-
-
-@component.add(
-    name='"Populasi historis+Projeksi"',
+    name="Populasi historis",
     units="jiwa",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
     depends_on={"time": 1},
 )
-def populasi_historisprojeksi():
+def populasi_historis():
     return np.interp(
         time(),
         [
@@ -9323,20 +9425,20 @@ def populasi_historisprojeksi():
             2023.0,
         ],
         [
-            3594240.0,
-            3732670.0,
-            3875060.0,
-            4022420.0,
-            4175500.0,
-            4334490.0,
-            4499530.0,
-            4670860.0,
-            4848740.0,
-            5033460.0,
-            5241530.0,
-            5321130.0,
-            5400920.0,
-            5480050.0,
+            17373200.0,
+            17658000.0,
+            17946300.0,
+            18224700.0,
+            18513100.0,
+            18802100.0,
+            19091700.0,
+            19385700.0,
+            19681500.0,
+            19978900.0,
+            20240400.0,
+            20530000.0,
+            20823800.0,
+            21120400.0,
         ],
     )
 
@@ -9396,36 +9498,36 @@ def standard_kebutuha_air_per_kapita():
 
 
 @component.add(
-    name="target LPE Provinsi",
+    name="target LPE Pulau",
     units="1/tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def target_lpe_provinsi():
+def target_lpe_pulau():
     return 0.07
 
 
 @component.add(
-    name="Target PDRB Provinsi",
+    name="Target PDRB Pulau",
     units="JutaRp/tahun",
     comp_type="Stateful",
     comp_subtype="Integ",
-    depends_on={"_integ_target_pdrb_provinsi": 1},
+    depends_on={"_integ_target_pdrb_pulau": 1},
     other_deps={
-        "_integ_target_pdrb_provinsi": {
-            "initial": {"pdrb_provinsi_awal": 1},
-            "step": {"perubahan_pdrb_provinsi_target": 1},
+        "_integ_target_pdrb_pulau": {
+            "initial": {"pdrb_pulau_awal": 1},
+            "step": {"perubahan_pdrb_pulau_target": 1},
         }
     },
 )
-def target_pdrb_provinsi():
-    return _integ_target_pdrb_provinsi()
+def target_pdrb_pulau():
+    return _integ_target_pdrb_pulau()
 
 
-_integ_target_pdrb_provinsi = Integ(
-    lambda: perubahan_pdrb_provinsi_target(),
-    lambda: pdrb_provinsi_awal(),
-    "_integ_target_pdrb_provinsi",
+_integ_target_pdrb_pulau = Integ(
+    lambda: perubahan_pdrb_pulau_target(),
+    lambda: pdrb_pulau_awal(),
+    "_integ_target_pdrb_pulau",
 )
 
 
@@ -9464,8 +9566,38 @@ def tenaga_kerja_historis():
     """
     return np.interp(
         time(),
-        [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
-        [2066840.0, 2071600.0, 2194750.0, 2167880.0, 2151100.0, 2371460.0, 2422470.0],
+        [
+            2010.0,
+            2011.0,
+            2012.0,
+            2013.0,
+            2014.0,
+            2015.0,
+            2016.0,
+            2017.0,
+            2018.0,
+            2019.0,
+            2020.0,
+            2021.0,
+            2022.0,
+            2023.0,
+        ],
+        [
+            6804880.0,
+            6982880.0,
+            7152070.0,
+            7302520.0,
+            7555700.0,
+            7779180.0,
+            8244030.0,
+            8256520.0,
+            8548470.0,
+            8942420.0,
+            8889930.0,
+            9110940.0,
+            9407230.0,
+            9061020.0,
+        ],
     )
 
 
@@ -9536,8 +9668,38 @@ def tpak_berbasis_populasi_table(x, final_subs=None):
 
 
 _hardcodedlookup_tpak_berbasis_populasi_table = HardcodedLookups(
-    [2016.0, 2017.0, 2018.0, 2019.0, 2020.0, 2021.0, 2022.0],
-    [0.490491, 0.469575, 0.470554, 0.449776, 0.431221, 0.463519, 0.464082],
+    [
+        2010.0,
+        2011.0,
+        2012.0,
+        2013.0,
+        2014.0,
+        2015.0,
+        2016.0,
+        2017.0,
+        2018.0,
+        2019.0,
+        2020.0,
+        2021.0,
+        2022.0,
+        2023.0,
+    ],
+    [
+        0.425,
+        0.429,
+        0.431,
+        0.432,
+        0.441,
+        0.448,
+        0.464,
+        0.459,
+        0.468,
+        0.477,
+        0.477,
+        0.48,
+        0.485,
+        0.493,
+    ],
     {},
     "interpolate",
     {},
@@ -9556,12 +9718,12 @@ def umur_kapital_rata2():
 
 
 @component.add(
-    name="Waktu meratakan PDRB provinsi",
+    name="Waktu meratakan PDRB Pulau",
     units="tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def waktu_meratakan_pdrb_provinsi():
+def waktu_meratakan_pdrb_pulau():
     return 0.5
 
 
@@ -9586,10 +9748,10 @@ def waktu_pemenuhan_investasi():
 
 
 @component.add(
-    name="Waktu Trend LPE Provinsi",
+    name="Waktu Trend LPE Pulau",
     units="tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def waktu_trend_lpe_provinsi():
+def waktu_trend_lpe_pulau():
     return 1

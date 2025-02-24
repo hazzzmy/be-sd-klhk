@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from pysd.py_backend.functions import step
-from pysd.py_backend.statefuls import Integ, Initial, Delay, Trend, Smooth
+from pysd.py_backend.statefuls import Integ, Smooth, Delay, Initial, Trend
 from pysd.py_backend.lookups import HardcodedLookups
 from pysd import Component
 
@@ -99,6 +99,563 @@ def time_step():
 
 
 @component.add(
+    name="Perubahan lahan pangan per kapita",
+    units="Ha/jiwa",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "lahan_pangan_per_kapita_skenario": 1,
+        "konverter_m2_ke_ha": 1,
+        "lahan_pangan_per_kapita_normal": 1,
+        "waktu_perubahan_lahan_pangan_per_kapita": 1,
+        "time": 1,
+    },
+)
+def perubahan_lahan_pangan_per_kapita():
+    return step(
+        __data["time"],
+        lahan_pangan_per_kapita_skenario() / konverter_m2_ke_ha()
+        - lahan_pangan_per_kapita_normal(),
+        waktu_perubahan_lahan_pangan_per_kapita(),
+    )
+
+
+@component.add(
+    name="konverter m3 ke L",
+    units="L/(m*m*m)",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def konverter_m3_ke_l():
+    return 1000
+
+
+@component.add(
+    name="konverter m2 ke ha",
+    units="m*m/Ha",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def konverter_m2_ke_ha():
+    return 10000
+
+
+@component.add(
+    name="Perubahan std debit per detik pertanian",
+    units="m*m*m/(Ha*detik)",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "debit_per_detik_pertanian_dasar_sk_1462023_skenario": 1,
+        "konverter_m3_ke_l": 1,
+        "debit_per_detik_pertanian_dasar_sk_1462023_normal": 1,
+        "waktu_perubahan_std_debit_per_detik_pertanian": 1,
+        "time": 1,
+    },
+)
+def perubahan_std_debit_per_detik_pertanian():
+    return step(
+        __data["time"],
+        debit_per_detik_pertanian_dasar_sk_1462023_skenario() / konverter_m3_ke_l()
+        - debit_per_detik_pertanian_dasar_sk_1462023_normal(),
+        waktu_perubahan_std_debit_per_detik_pertanian(),
+    )
+
+
+@component.add(
+    name='"Perubahan Lahan built-up per kapita"',
+    units="Ha/jiwa",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "lahan_builtup_per_kapita_skenario": 1,
+        "konverter_m2_ke_ha": 1,
+        "lahan_builtup_per_kapita_normal": 1,
+        "waktu_perubahan_lahan_builtup_per_kapita": 1,
+        "time": 1,
+    },
+)
+def perubahan_lahan_builtup_per_kapita():
+    return step(
+        __data["time"],
+        lahan_builtup_per_kapita_skenario() / konverter_m2_ke_ha()
+        - lahan_builtup_per_kapita_normal(),
+        waktu_perubahan_lahan_builtup_per_kapita(),
+    )
+
+
+@component.add(
+    name="Lahan Pangan Per Kapita Normal",
+    units="Ha/jiwa",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def lahan_pangan_per_kapita_normal():
+    return 0.107
+
+
+@component.add(
+    name="Lahan Pangan Per Kapita Skenario",
+    units="m*m/jiwa",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def lahan_pangan_per_kapita_skenario():
+    return 1070
+
+
+@component.add(
+    name="delay perubahan lahan built up per kapita",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def delay_perubahan_lahan_built_up_per_kapita():
+    return 5
+
+
+@component.add(
+    name="delay perubahan lahan pangan per kapita",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def delay_perubahan_lahan_pangan_per_kapita():
+    return 5
+
+
+@component.add(
+    name='"Lahan built-up per kapita skenario"',
+    units="m*m/jiwa",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def lahan_builtup_per_kapita_skenario():
+    return 20
+
+
+@component.add(
+    name='"Lahan built-up per kapita"',
+    units="Ha/jiwa",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "perubahan_lahan_builtup_per_kapita_delay": 1,
+        "lahan_builtup_per_kapita_normal": 1,
+    },
+)
+def lahan_builtup_per_kapita():
+    return (
+        perubahan_lahan_builtup_per_kapita_delay() + lahan_builtup_per_kapita_normal()
+    )
+
+
+@component.add(
+    name='"Perubahan Lahan built-up per kapita delay"',
+    units="Ha/jiwa",
+    comp_type="Stateful",
+    comp_subtype="Smooth",
+    depends_on={"_smooth_perubahan_lahan_builtup_per_kapita_delay": 1},
+    other_deps={
+        "_smooth_perubahan_lahan_builtup_per_kapita_delay": {
+            "initial": {},
+            "step": {
+                "perubahan_lahan_builtup_per_kapita": 1,
+                "delay_perubahan_lahan_built_up_per_kapita": 1,
+            },
+        }
+    },
+)
+def perubahan_lahan_builtup_per_kapita_delay():
+    return _smooth_perubahan_lahan_builtup_per_kapita_delay()
+
+
+_smooth_perubahan_lahan_builtup_per_kapita_delay = Smooth(
+    lambda: perubahan_lahan_builtup_per_kapita(),
+    lambda: delay_perubahan_lahan_built_up_per_kapita(),
+    lambda: 0,
+    lambda: 3,
+    "_smooth_perubahan_lahan_builtup_per_kapita_delay",
+)
+
+
+@component.add(
+    name="Perubahan lahan pangan per kapita delay",
+    units="Ha/jiwa",
+    comp_type="Stateful",
+    comp_subtype="Smooth",
+    depends_on={"_smooth_perubahan_lahan_pangan_per_kapita_delay": 1},
+    other_deps={
+        "_smooth_perubahan_lahan_pangan_per_kapita_delay": {
+            "initial": {},
+            "step": {
+                "perubahan_lahan_pangan_per_kapita": 1,
+                "delay_perubahan_lahan_pangan_per_kapita": 1,
+            },
+        }
+    },
+)
+def perubahan_lahan_pangan_per_kapita_delay():
+    return _smooth_perubahan_lahan_pangan_per_kapita_delay()
+
+
+_smooth_perubahan_lahan_pangan_per_kapita_delay = Smooth(
+    lambda: perubahan_lahan_pangan_per_kapita(),
+    lambda: delay_perubahan_lahan_pangan_per_kapita(),
+    lambda: 0,
+    lambda: 3,
+    "_smooth_perubahan_lahan_pangan_per_kapita_delay",
+)
+
+
+@component.add(
+    name="Waktu perubahan lahan pangan per kapita",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def waktu_perubahan_lahan_pangan_per_kapita():
+    return 3000
+
+
+@component.add(
+    name="Lahan Pangan per kapita",
+    units="Ha/jiwa",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "lahan_pangan_per_kapita_normal": 1,
+        "perubahan_lahan_pangan_per_kapita_delay": 1,
+    },
+)
+def lahan_pangan_per_kapita():
+    """
+    data n.a.
+    """
+    return lahan_pangan_per_kapita_normal() + perubahan_lahan_pangan_per_kapita_delay()
+
+
+@component.add(
+    name='"Lahan built-up per kapita normal"',
+    units="Ha/jiwa",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def lahan_builtup_per_kapita_normal():
+    return 0.002
+
+
+@component.add(
+    name='"Waktu perubahan Lahan built-up per kapita"',
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def waktu_perubahan_lahan_builtup_per_kapita():
+    return 3000
+
+
+@component.add(
+    name="Waktu perubahan std debit per detik pertanian",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def waktu_perubahan_std_debit_per_detik_pertanian():
+    return 3000
+
+
+@component.add(
+    name="Perubahan standard kebutuhan air delay",
+    units="m*m*m/(tahun*jiwa)",
+    comp_type="Stateful",
+    comp_subtype="Smooth",
+    depends_on={"_smooth_perubahan_standard_kebutuhan_air_delay": 1},
+    other_deps={
+        "_smooth_perubahan_standard_kebutuhan_air_delay": {
+            "initial": {},
+            "step": {
+                "perubahan_standard_kebutuhan_air": 1,
+                "delay_perubahan_standard_air": 1,
+            },
+        }
+    },
+)
+def perubahan_standard_kebutuhan_air_delay():
+    return _smooth_perubahan_standard_kebutuhan_air_delay()
+
+
+_smooth_perubahan_standard_kebutuhan_air_delay = Smooth(
+    lambda: perubahan_standard_kebutuhan_air(),
+    lambda: delay_perubahan_standard_air(),
+    lambda: 0,
+    lambda: 3,
+    "_smooth_perubahan_standard_kebutuhan_air_delay",
+)
+
+
+@component.add(
+    name="delay perubahan standard air",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def delay_perubahan_standard_air():
+    return 5
+
+
+@component.add(
+    name="delay perubahan std debit per detik pertanian",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def delay_perubahan_std_debit_per_detik_pertanian():
+    return 5
+
+
+@component.add(
+    name='"debit per detik pertanian dasar SK 146/2023 normal"',
+    units="m*m*m/(Ha*detik)",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def debit_per_detik_pertanian_dasar_sk_1462023_normal():
+    return 0.001
+
+
+@component.add(
+    name='"std kebutuhan air per kapita SK 146/2023 target"',
+    units="m*m*m/(tahun*jiwa)",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def std_kebutuhan_air_per_kapita_sk_1462023_target():
+    return 42.3
+
+
+@component.add(
+    name="kebutuhan air domestik SK 146",
+    units="m*m*m/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "perubahan_standard_kebutuhan_air_delay": 1,
+        "std_kebutuhan_air_per_kapita_sk_1462023": 1,
+        "populasi_pulau": 1,
+        "faktor_koreksi_kebutuhan_air_per_kap_sk_1462023": 1,
+    },
+)
+def kebutuhan_air_domestik_sk_146():
+    return (
+        (
+            perubahan_standard_kebutuhan_air_delay()
+            + std_kebutuhan_air_per_kapita_sk_1462023()
+        )
+        * populasi_pulau()
+        * faktor_koreksi_kebutuhan_air_per_kap_sk_1462023()
+    )
+
+
+@component.add(
+    name="Perubahan std debit per detik pertanian delay",
+    units="m*m*m/(Ha*detik)",
+    comp_type="Stateful",
+    comp_subtype="Smooth",
+    depends_on={"_smooth_perubahan_std_debit_per_detik_pertanian_delay": 1},
+    other_deps={
+        "_smooth_perubahan_std_debit_per_detik_pertanian_delay": {
+            "initial": {},
+            "step": {
+                "perubahan_std_debit_per_detik_pertanian": 1,
+                "delay_perubahan_std_debit_per_detik_pertanian": 1,
+            },
+        }
+    },
+)
+def perubahan_std_debit_per_detik_pertanian_delay():
+    return _smooth_perubahan_std_debit_per_detik_pertanian_delay()
+
+
+_smooth_perubahan_std_debit_per_detik_pertanian_delay = Smooth(
+    lambda: perubahan_std_debit_per_detik_pertanian(),
+    lambda: delay_perubahan_std_debit_per_detik_pertanian(),
+    lambda: 0,
+    lambda: 3,
+    "_smooth_perubahan_std_debit_per_detik_pertanian_delay",
+)
+
+
+@component.add(
+    name="Perubahan standard kebutuhan air",
+    units="m*m*m/(tahun*jiwa)",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "std_kebutuhan_air_per_kapita_sk_1462023_target": 1,
+        "std_kebutuhan_air_per_kapita_sk_1462023": 1,
+        "waktu_pengubahan_standard_air": 1,
+        "time": 1,
+    },
+)
+def perubahan_standard_kebutuhan_air():
+    return step(
+        __data["time"],
+        std_kebutuhan_air_per_kapita_sk_1462023_target()
+        - std_kebutuhan_air_per_kapita_sk_1462023(),
+        waktu_pengubahan_standard_air(),
+    )
+
+
+@component.add(
+    name="Waktu pengubahan standard air",
+    units="tahun",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def waktu_pengubahan_standard_air():
+    return 3000
+
+
+@component.add(
+    name='"std kebutuhan air per pertanian SK 146/2023"',
+    units="m*m*m/detik/Ha",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "debit_per_detik_pertanian_dasar_sk_1462023_normal": 1,
+        "perubahan_std_debit_per_detik_pertanian_delay": 1,
+    },
+)
+def std_kebutuhan_air_per_pertanian_sk_1462023():
+    return (
+        debit_per_detik_pertanian_dasar_sk_1462023_normal()
+        + perubahan_std_debit_per_detik_pertanian_delay()
+    )
+
+
+@component.add(
+    name='"debit per detik pertanian dasar SK 146/2023 skenario"',
+    units="L/(Ha*detik)",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def debit_per_detik_pertanian_dasar_sk_1462023_skenario():
+    return 1
+
+
+@component.add(
+    name="Perubahan tk teknologi",
+    units="1/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "lpe_pulau": 1,
+        "persen": 1,
+        "elastisitas_lpe_thd_perubahan_teknologi": 1,
+        "tingkat_teknologi": 1,
+    },
+)
+def perubahan_tk_teknologi():
+    return (
+        lpe_pulau()
+        / persen()
+        * elastisitas_lpe_thd_perubahan_teknologi()
+        * tingkat_teknologi()
+    )
+
+
+@component.add(
+    name="Tk Pengangguran",
+    units="percent",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={"pengangguran": 1, "angkatan_kerja": 1, "persen": 1},
+)
+def tk_pengangguran():
+    return pengangguran() / angkatan_kerja() * persen()
+
+
+@component.add(
+    name="LPE Pulau",
+    units="percent/tahun",
+    comp_type="Stateful",
+    comp_subtype="Trend",
+    depends_on={"_trend_lpe_pulau": 1, "persen": 1},
+    other_deps={
+        "_trend_lpe_pulau": {
+            "initial": {
+                "lpe_pulau_mulamula": 1,
+                "pdrb_pulau": 1,
+                "waktu_trend_lpe_provinsi": 1,
+            },
+            "step": {"pdrb_pulau": 1, "waktu_trend_lpe_provinsi": 1},
+        }
+    },
+)
+def lpe_pulau():
+    return _trend_lpe_pulau() * persen()
+
+
+_trend_lpe_pulau = Trend(
+    lambda: pdrb_pulau(),
+    lambda: waktu_trend_lpe_provinsi(),
+    lambda: lpe_pulau_mulamula(),
+    "_trend_lpe_pulau",
+)
+
+
+@component.add(
+    name="perubahan Laju Perubahan Lahan Terbangun per Kapita",
+    units="1/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "laju_perubahan_lahan_terbangun_per_kapita_asumsi": 1,
+        "persen": 1,
+        "laju_perubahan_lahan_terbangun_per_kapita": 1,
+        "time_to_change_laju_perubahan_lahan_terbangun_per_kapita": 1,
+        "time": 1,
+    },
+)
+def perubahan_laju_perubahan_lahan_terbangun_per_kapita():
+    return step(
+        __data["time"],
+        laju_perubahan_lahan_terbangun_per_kapita_asumsi() / persen()
+        - laju_perubahan_lahan_terbangun_per_kapita(),
+        time_to_change_laju_perubahan_lahan_terbangun_per_kapita(),
+    )
+
+
+@component.add(
+    name="Persen", units="percent", comp_type="Constant", comp_subtype="Normal"
+)
+def persen():
+    return 100
+
+
+@component.add(
+    name="perubahan laju pertumbuhan populasi",
+    units="1/tahun",
+    comp_type="Auxiliary",
+    comp_subtype="Normal",
+    depends_on={
+        "laju_pertumbuhan_populasi_asumsi": 1,
+        "persen": 1,
+        "laju_pertumbuhan_populasi": 1,
+        "time_to_change_laju_pertumbuhan_populasi_asumsi": 1,
+        "time": 1,
+    },
+)
+def perubahan_laju_pertumbuhan_populasi():
+    return step(
+        __data["time"],
+        laju_pertumbuhan_populasi_asumsi() / persen() - laju_pertumbuhan_populasi(),
+        time_to_change_laju_pertumbuhan_populasi_asumsi(),
+    )
+
+
+@component.add(
     name="perubahan Laju Perubahan Lahan Terbangun per Kapita delay",
     units="Dmnl/tahun",
     comp_type="Stateful",
@@ -175,27 +732,6 @@ def laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy():
 
 
 @component.add(
-    name="perubahan Laju Perubahan Lahan Terbangun per Kapita",
-    units="1/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "laju_perubahan_lahan_terbangun_per_kapita_asumsi": 1,
-        "laju_perubahan_lahan_terbangun_per_kapita": 1,
-        "time_to_change_laju_perubahan_lahan_terbangun_per_kapita": 1,
-        "time": 1,
-    },
-)
-def perubahan_laju_perubahan_lahan_terbangun_per_kapita():
-    return step(
-        __data["time"],
-        laju_perubahan_lahan_terbangun_per_kapita_asumsi()
-        - laju_perubahan_lahan_terbangun_per_kapita(),
-        time_to_change_laju_perubahan_lahan_terbangun_per_kapita(),
-    )
-
-
-@component.add(
     name="time to change Laju Perubahan Lahan Terbangun per Kapita",
     units="tahun",
     comp_type="Constant",
@@ -207,12 +743,12 @@ def time_to_change_laju_perubahan_lahan_terbangun_per_kapita():
 
 @component.add(
     name="Laju Perubahan Lahan Terbangun per Kapita asumsi",
-    units="1/tahun",
+    units="percent/tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
 def laju_perubahan_lahan_terbangun_per_kapita_asumsi():
-    return 0.01
+    return 1
 
 
 @component.add(
@@ -344,12 +880,12 @@ def lpp_historis_dan_policy():
 
 @component.add(
     name="laju pertumbuhan populasi asumsi",
-    units="1/tahun",
+    units="percent/tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
 def laju_pertumbuhan_populasi_asumsi():
-    return 0.0116235
+    return 1.16
 
 
 @component.add(
@@ -425,21 +961,6 @@ def time_to_change_mps_assumption():
 
 
 @component.add(
-    name="Perubahan tk teknologi",
-    units="1/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "lpe_pulau": 1,
-        "elastisitas_lpe_thd_perubahan_teknologi": 1,
-        "tingkat_teknologi": 1,
-    },
-)
-def perubahan_tk_teknologi():
-    return lpe_pulau() * elastisitas_lpe_thd_perubahan_teknologi() * tingkat_teknologi()
-
-
-@component.add(
     name="time to change laju pertumbuhan populasi asumsi",
     units="tahun",
     comp_type="Constant",
@@ -447,26 +968,6 @@ def perubahan_tk_teknologi():
 )
 def time_to_change_laju_pertumbuhan_populasi_asumsi():
     return 3000
-
-
-@component.add(
-    name="perubahan laju pertumbuhan populasi",
-    units="1/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "laju_pertumbuhan_populasi_asumsi": 1,
-        "laju_pertumbuhan_populasi": 1,
-        "time_to_change_laju_pertumbuhan_populasi_asumsi": 1,
-        "time": 1,
-    },
-)
-def perubahan_laju_pertumbuhan_populasi():
-    return step(
-        __data["time"],
-        laju_pertumbuhan_populasi_asumsi() - laju_pertumbuhan_populasi(),
-        time_to_change_laju_pertumbuhan_populasi_asumsi(),
-    )
 
 
 @component.add(
@@ -608,7 +1109,7 @@ def indeks_d3t_lahan_kelas_1():
 
 
 @component.add(
-    name="Ambang Batas populasi Air",
+    name="Ambang Batas Populasi Air",
     units="jiwa",
     comp_type="Auxiliary",
     comp_subtype="Normal",
@@ -751,16 +1252,6 @@ def aktivasi_potensi_air_tanah():
 
 
 @component.add(
-    name='"Lahan built-up per kapita"',
-    units="Ha/jiwa",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def lahan_builtup_per_kapita():
-    return 0.002
-
-
-@component.add(
     name="Ambang batas penduduk dari tempat tinggal",
     units="jiwa",
     comp_type="Auxiliary",
@@ -827,25 +1318,6 @@ def koefisien_i_persawahan():
 )
 def kebutuhan_lahan_terbangun():
     return lahan_terbangun_per_kapita() * populasi_pulau()
-
-
-@component.add(
-    name="kebutuhan air domestik SK 146",
-    units="m*m*m/tahun",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={
-        "std_kebutuhan_air_per_kapita_sk_1462023": 1,
-        "populasi_pulau": 1,
-        "faktor_koreksi_kebutuhan_air_per_kap_sk_1462023": 1,
-    },
-)
-def kebutuhan_air_domestik_sk_146():
-    return (
-        std_kebutuhan_air_per_kapita_sk_1462023()
-        * populasi_pulau()
-        * faktor_koreksi_kebutuhan_air_per_kap_sk_1462023()
-    )
 
 
 @component.add(
@@ -1779,11 +2251,11 @@ _integ_lahan_terbangun = Integ(
     comp_subtype="Normal",
     depends_on={
         "pdrb_pulau_awal": 1,
-        "kapital": 1,
         "kapital_awal": 1,
+        "kapital": 1,
         "intensitas_kapital": 2,
-        "tenaga_kerja": 1,
         "tenaga_kerja_awal": 1,
+        "tenaga_kerja": 1,
         "tingkat_teknologi": 1,
         "capacity_utilization_factor": 1,
         "dampak_kecukupan_air_industri_ekonomi": 1,
@@ -2076,17 +2548,6 @@ def laju_perubahan_klr():
 )
 def tenaga_kerja():
     return np.minimum(angkatan_kerja() * 0.975, tenaga_kerja_dari_klr())
-
-
-@component.add(
-    name="Tk Pengangguran",
-    units="1",
-    comp_type="Auxiliary",
-    comp_subtype="Normal",
-    depends_on={"pengangguran": 1, "angkatan_kerja": 1},
-)
-def tk_pengangguran():
-    return pengangguran() / angkatan_kerja()
 
 
 @component.add(
@@ -7993,19 +8454,6 @@ def perubahan_iku_pulau():
 
 
 @component.add(
-    name="Lahan Pangan per kapita",
-    units="Ha/jiwa",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def lahan_pangan_per_kapita():
-    """
-    data n.a.
-    """
-    return 0.107
-
-
-@component.add(
     name="Populasi Pulau",
     units="jiwa",
     comp_type="Stateful",
@@ -8092,16 +8540,6 @@ def persentase_air_tercemar():
         [2019.0, 2020.0, 2021.0, 2022.0, 2023.0, 2045.0],
         [0.161671, 0.161671, 0.161671, 0.161671, 0.161671, 0.161671],
     )
-
-
-@component.add(
-    name='"std kebutuhan air per pertanian SK 146/2023"',
-    units="m*m*m/detik/Ha",
-    comp_type="Constant",
-    comp_subtype="Normal",
-)
-def std_kebutuhan_air_per_pertanian_sk_1462023():
-    return 0.001
 
 
 @component.add(
@@ -9006,8 +9444,8 @@ def kapital_awal():
     depends_on={
         "intensitas_kapital": 1,
         "target_pdrb_pulau": 1,
-        "umur_kapital_rata2": 1,
         "r": 1,
+        "umur_kapital_rata2": 1,
     },
 )
 def kapital_dibutuhkan():
@@ -9170,35 +9608,6 @@ _hardcodedlookup_laju_pertumbuhan_populasi_table = HardcodedLookups(
 )
 def liter_ke_meter_kubik():
     return 1000
-
-
-@component.add(
-    name="LPE Pulau",
-    units="1/tahun",
-    comp_type="Stateful",
-    comp_subtype="Trend",
-    depends_on={"_trend_lpe_pulau": 1},
-    other_deps={
-        "_trend_lpe_pulau": {
-            "initial": {
-                "lpe_pulau_mulamula": 1,
-                "pdrb_pulau": 1,
-                "waktu_trend_lpe_provinsi": 1,
-            },
-            "step": {"pdrb_pulau": 1, "waktu_trend_lpe_provinsi": 1},
-        }
-    },
-)
-def lpe_pulau():
-    return _trend_lpe_pulau()
-
-
-_trend_lpe_pulau = Trend(
-    lambda: pdrb_pulau(),
-    lambda: waktu_trend_lpe_provinsi(),
-    lambda: lpe_pulau_mulamula(),
-    "_trend_lpe_pulau",
-)
 
 
 @component.add(

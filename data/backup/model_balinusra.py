@@ -6,8 +6,8 @@ Translated using PySD
 from pathlib import Path
 import numpy as np
 
-from pysd.py_backend.functions import step, not_implemented_function, if_then_else
-from pysd.py_backend.statefuls import Initial, Smooth, Delay, Trend, Integ
+from pysd.py_backend.functions import if_then_else, not_implemented_function, step
+from pysd.py_backend.statefuls import Delay, Initial, Trend, Smooth, Integ
 from pysd.py_backend.lookups import HardcodedLookups
 from pysd import Component
 
@@ -96,6 +96,86 @@ def time_step():
 #######################################################################
 #                           MODEL VARIABLES                           #
 #######################################################################
+
+
+@component.add(
+    name="Indeks D3T Air kelas 2",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_2():
+    return 0.4
+
+
+@component.add(
+    name="Indeks D3T Air kelas 3",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_3():
+    return 0.2
+
+
+@component.add(
+    name="Indeks D3T Air kelas 4",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_4():
+    return 0.1
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 4",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_4():
+    return 2
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 1",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_1():
+    return 0.5
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 2",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_2():
+    return 1
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 3",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_3():
+    return 1.5
+
+
+@component.add(
+    name="Indeks D3T Air kelas 1",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_1():
+    return 0.8
 
 
 @component.add(
@@ -212,8 +292,8 @@ def tabungan():
     comp_subtype="Normal",
     depends_on={
         "switch_impact_migrasi_dari_ekonomi": 1,
-        "power_impact_migrasi_dari_ekonomi": 1,
         "rasio_pdrb_per_kapita_to_2023": 1,
+        "power_impact_migrasi_dari_ekonomi": 1,
     },
 )
 def impact_migrasi_dari_ekonomi():
@@ -279,6 +359,7 @@ def rasio_tenaga_kerja():
 
 @component.add(
     name="Elastisitas LPE thd perubahan teknologi",
+    units="1",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
@@ -403,8 +484,8 @@ def perubahan_laju_perubahan_lahan_terbangun_per_kapita():
     depends_on={
         "switch_perubahan_lahan_per_kapita": 1,
         "laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy": 1,
-        "elasticity_pdrb_per_kapita_to_unit_lahan_terbangun": 1,
         "laju_pdrb_per_kapita": 1,
+        "elasticity_pdrb_per_kapita_to_unit_lahan_terbangun": 1,
         "lahan_terbangun_per_kapita": 1,
     },
 )
@@ -12119,7 +12200,7 @@ def persentase_air_tercemar():
     return np.interp(
         time(),
         [2019.0, 2020.0, 2021.0, 2022.0, 2023.0, 2045.0],
-        [0.092893, 0.094337, 0.111783, 0.113434, 0.11, 0.2],
+        [0.164298, 0.164298, 0.164298, 0.164298, 0.164298, 0.164298],
     )
 
 
@@ -12529,8 +12610,8 @@ _delay_dampak_kualitas_air_industri_ekonomi_delay = Delay(
     comp_subtype="Normal",
     depends_on={
         "pdrb_pulau_awal": 1,
-        "kapital_awal": 1,
         "intensitas_kapital": 2,
+        "kapital_awal": 1,
         "kapital": 1,
         "tenaga_kerja": 1,
         "tenaga_kerja_awal": 1,
@@ -13066,8 +13147,8 @@ def kapital_awal():
     depends_on={
         "intensitas_kapital": 1,
         "target_pdrb_pulau": 1,
-        "r": 1,
         "umur_kapital_rata2": 1,
+        "r": 1,
     },
 )
 def kapital_dibutuhkan():
@@ -13171,6 +13252,8 @@ def kor():
 def laju_pertumbuhan_populasi():
     current_time = time() / satu_tahun_unit()
     return laju_pertumbuhan_populasi_table(current_time)
+
+
 
 @component.add(
     name="laju pertumbuhan populasi table",

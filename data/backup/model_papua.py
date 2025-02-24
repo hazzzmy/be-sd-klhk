@@ -6,8 +6,8 @@ Translated using PySD
 from pathlib import Path
 import numpy as np
 
-from pysd.py_backend.functions import step, not_implemented_function
-from pysd.py_backend.statefuls import Delay, Trend, Integ, Smooth, Initial
+from pysd.py_backend.functions import step
+from pysd.py_backend.statefuls import Delay, Integ, Trend, Smooth, Initial
 from pysd.py_backend.lookups import HardcodedLookups
 from pysd import Component
 
@@ -96,6 +96,86 @@ def time_step():
 #######################################################################
 #                           MODEL VARIABLES                           #
 #######################################################################
+
+
+@component.add(
+    name="Indeks D3T Air kelas 1",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_1():
+    return 0.8
+
+
+@component.add(
+    name="Indeks D3T Air kelas 2",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_2():
+    return 0.4
+
+
+@component.add(
+    name="Indeks D3T Air kelas 3",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_3():
+    return 0.2
+
+
+@component.add(
+    name="Indeks D3T Air kelas 4",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_air_kelas_4():
+    return 0.1
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 3",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_3():
+    return 1.5
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 4",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_4():
+    return 2
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 1",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_1():
+    return 0.5
+
+
+@component.add(
+    name="Indeks D3T Lahan kelas 2",
+    units="Dmnl",
+    comp_type="Constant",
+    comp_subtype="Normal",
+)
+def indeks_d3t_lahan_kelas_2():
+    return 1
 
 
 @component.add(
@@ -894,10 +974,10 @@ def kebutuhan_lahan_terbangun():
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
-        "pdrb_provinsi_awal": 1,
+        "pdrb_pulau_awal": 1,
+        "kapital": 1,
         "kapital_awal": 1,
         "intensitas_kapital": 2,
-        "kapital": 1,
         "tenaga_kerja_awal": 1,
         "tenaga_kerja": 1,
         "tingkat_teknologi": 1,
@@ -908,7 +988,7 @@ def kebutuhan_lahan_terbangun():
 )
 def pdrb_pulau():
     return (
-        pdrb_provinsi_awal()
+        pdrb_pulau_awal()
         * (kapital() / kapital_awal()) ** intensitas_kapital()
         * (tenaga_kerja() / tenaga_kerja_awal()) ** (1 - intensitas_kapital())
         * tingkat_teknologi()
@@ -8772,10 +8852,10 @@ _integ_kapital = Integ(
     units="JutaRp",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"pdrb_provinsi_awal": 1, "asumsi_kor_awal": 1},
+    depends_on={"pdrb_pulau_awal": 1, "asumsi_kor_awal": 1},
 )
 def kapital_awal():
-    return pdrb_provinsi_awal() * asumsi_kor_awal()
+    return pdrb_pulau_awal() * asumsi_kor_awal()
 
 
 @component.add(
@@ -8785,15 +8865,13 @@ def kapital_awal():
     comp_subtype="Normal",
     depends_on={
         "intensitas_kapital": 1,
-        "target_pdrb_provinsi": 1,
-        "umur_kapital_rata2": 1,
+        "target_pdrb_pulau": 1,
         "r": 1,
+        "umur_kapital_rata2": 1,
     },
 )
 def kapital_dibutuhkan():
-    return (
-        intensitas_kapital() * target_pdrb_provinsi() / (1 / umur_kapital_rata2() + r())
-    )
+    return intensitas_kapital() * target_pdrb_pulau() / (1 / umur_kapital_rata2() + r())
 
 
 @component.add(
@@ -8887,12 +8965,10 @@ def kor():
     units="1/tahun",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"laju_pertumbuhan_populasi_table": 1, "satu_tahun_unit": 1, "time": 1},
+    depends_on={"time": 1, "satu_tahun_unit": 1, "laju_pertumbuhan_populasi_table": 1},
 )
-
 def laju_pertumbuhan_populasi():
-    current_time = time() / satu_tahun_unit()
-    return laju_pertumbuhan_populasi_table(current_time)
+    return laju_pertumbuhan_populasi_table(time() / satu_tahun_unit())
 
 
 @component.add(
@@ -8935,11 +9011,11 @@ def liter_ke_meter_kubik():
     other_deps={
         "_trend_lpe_pulau": {
             "initial": {
-                "lpe_provinsi_mulamula": 1,
+                "lpe_pulau_mulamula": 1,
                 "pdrb_pulau": 1,
-                "waktu_trend_lpe_provinsi": 1,
+                "waktu_trend_lpe_pulau": 1,
             },
-            "step": {"pdrb_pulau": 1, "waktu_trend_lpe_provinsi": 1},
+            "step": {"pdrb_pulau": 1, "waktu_trend_lpe_pulau": 1},
         }
     },
 )
@@ -8949,8 +9025,8 @@ def lpe_pulau():
 
 _trend_lpe_pulau = Trend(
     lambda: pdrb_pulau(),
-    lambda: waktu_trend_lpe_provinsi(),
-    lambda: lpe_provinsi_mulamula(),
+    lambda: waktu_trend_lpe_pulau(),
+    lambda: lpe_pulau_mulamula(),
     "_trend_lpe_pulau",
 )
 
@@ -8964,11 +9040,11 @@ _trend_lpe_pulau = Trend(
     other_deps={
         "_trend_lpe_provinsi_historis": {
             "initial": {
-                "lpe_provinsi_mulamula": 1,
-                "pdrb_provinsi_historis": 1,
-                "waktu_trend_lpe_provinsi": 1,
+                "lpe_pulau_mulamula": 1,
+                "pdrb_pulau_historis": 1,
+                "waktu_trend_lpe_pulau": 1,
             },
-            "step": {"pdrb_provinsi_historis": 1, "waktu_trend_lpe_provinsi": 1},
+            "step": {"pdrb_pulau_historis": 1, "waktu_trend_lpe_pulau": 1},
         }
     },
 )
@@ -8977,20 +9053,20 @@ def lpe_provinsi_historis():
 
 
 _trend_lpe_provinsi_historis = Trend(
-    lambda: pdrb_provinsi_historis(),
-    lambda: waktu_trend_lpe_provinsi(),
-    lambda: lpe_provinsi_mulamula(),
+    lambda: pdrb_pulau_historis(),
+    lambda: waktu_trend_lpe_pulau(),
+    lambda: lpe_pulau_mulamula(),
     "_trend_lpe_provinsi_historis",
 )
 
 
 @component.add(
-    name='"LPE provinsi Mula-mula"',
+    name='"LPE Pulau Mula-mula"',
     units="1/tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def lpe_provinsi_mulamula():
+def lpe_pulau_mulamula():
     return 0.05
 
 
@@ -9047,38 +9123,35 @@ def mps():
 
 
 @component.add(
-    name="PDRB Provinsi awal",
+    name="PDRB Pulau awal",
     units="JutaRp/tahun",
     comp_type="Stateful",
     comp_subtype="Initial",
-    depends_on={"_initial_pdrb_provinsi_awal": 1},
+    depends_on={"_initial_pdrb_pulau_awal": 1},
     other_deps={
-        "_initial_pdrb_provinsi_awal": {
-            "initial": {"pdrb_provinsi_historis": 1},
-            "step": {},
-        }
+        "_initial_pdrb_pulau_awal": {"initial": {"pdrb_pulau_historis": 1}, "step": {}}
     },
 )
-def pdrb_provinsi_awal():
+def pdrb_pulau_awal():
     """
     PDRB ADHK Bali 2010
     """
-    return _initial_pdrb_provinsi_awal()
+    return _initial_pdrb_pulau_awal()
 
 
-_initial_pdrb_provinsi_awal = Initial(
-    lambda: pdrb_provinsi_historis(), "_initial_pdrb_provinsi_awal"
+_initial_pdrb_pulau_awal = Initial(
+    lambda: pdrb_pulau_historis(), "_initial_pdrb_pulau_awal"
 )
 
 
 @component.add(
-    name="PDRB Provinsi historis",
+    name="PDRB Pulau historis",
     units="JutaRp/tahun",
     comp_type="Auxiliary",
     comp_subtype="with Lookup",
     depends_on={"time": 1},
 )
-def pdrb_provinsi_historis():
+def pdrb_pulau_historis():
     return np.interp(
         time(),
         [
@@ -9117,26 +9190,26 @@ def pdrb_provinsi_historis():
 
 
 @component.add(
-    name="PDRB Provinsi rerata",
+    name="PDRB Pulau rerata",
     units="JutaRp/tahun",
     comp_type="Stateful",
     comp_subtype="Integ",
-    depends_on={"_integ_pdrb_provinsi_rerata": 1},
+    depends_on={"_integ_pdrb_pulau_rerata": 1},
     other_deps={
-        "_integ_pdrb_provinsi_rerata": {
-            "initial": {"pdrb_provinsi_awal": 1},
-            "step": {"perubahan_pdrb_provinsi_rerata": 1},
+        "_integ_pdrb_pulau_rerata": {
+            "initial": {"pdrb_pulau_awal": 1},
+            "step": {"perubahan_pdrb_pulau_rerata": 1},
         }
     },
 )
-def pdrb_provinsi_rerata():
-    return _integ_pdrb_provinsi_rerata()
+def pdrb_pulau_rerata():
+    return _integ_pdrb_pulau_rerata()
 
 
-_integ_pdrb_provinsi_rerata = Integ(
-    lambda: perubahan_pdrb_provinsi_rerata(),
-    lambda: pdrb_provinsi_awal(),
-    "_integ_pdrb_provinsi_rerata",
+_integ_pdrb_pulau_rerata = Integ(
+    lambda: perubahan_pdrb_pulau_rerata(),
+    lambda: pdrb_pulau_awal(),
+    "_integ_pdrb_pulau_rerata",
 )
 
 
@@ -9256,29 +9329,29 @@ _hardcodedlookup_tk_pengangguran_historisprojeksi_table = HardcodedLookups(
 
 
 @component.add(
-    name="Perubahan PDRB Provinsi rerata",
+    name="Perubahan PDRB Pulau rerata",
     units="miliarRp/(tahun*tahun)",
     comp_type="Auxiliary",
     comp_subtype="Normal",
     depends_on={
         "pdrb_pulau": 1,
-        "pdrb_provinsi_rerata": 1,
-        "waktu_meratakan_pdrb_provinsi": 1,
+        "pdrb_pulau_rerata": 1,
+        "waktu_meratakan_pdrb_pulau": 1,
     },
 )
-def perubahan_pdrb_provinsi_rerata():
-    return (pdrb_pulau() - pdrb_provinsi_rerata()) / waktu_meratakan_pdrb_provinsi()
+def perubahan_pdrb_pulau_rerata():
+    return (pdrb_pulau() - pdrb_pulau_rerata()) / waktu_meratakan_pdrb_pulau()
 
 
 @component.add(
-    name="Perubahan PDRB Provinsi target",
+    name="Perubahan PDRB Pulau target",
     units="miliarRp/(tahun*tahun)",
     comp_type="Auxiliary",
     comp_subtype="Normal",
-    depends_on={"pdrb_provinsi_rerata": 1, "target_lpe_provinsi": 1},
+    depends_on={"pdrb_pulau_rerata": 1, "target_lpe_pulau": 1},
 )
-def perubahan_pdrb_provinsi_target():
-    return pdrb_provinsi_rerata() * target_lpe_provinsi()
+def perubahan_pdrb_pulau_target():
+    return pdrb_pulau_rerata() * target_lpe_pulau()
 
 
 @component.add(
@@ -9396,36 +9469,36 @@ def standard_kebutuha_air_per_kapita():
 
 
 @component.add(
-    name="target LPE Provinsi",
+    name="target LPE Pulau",
     units="1/tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def target_lpe_provinsi():
+def target_lpe_pulau():
     return 0.07
 
 
 @component.add(
-    name="Target PDRB Provinsi",
+    name="Target PDRB Pulau",
     units="JutaRp/tahun",
     comp_type="Stateful",
     comp_subtype="Integ",
-    depends_on={"_integ_target_pdrb_provinsi": 1},
+    depends_on={"_integ_target_pdrb_pulau": 1},
     other_deps={
-        "_integ_target_pdrb_provinsi": {
-            "initial": {"pdrb_provinsi_awal": 1},
-            "step": {"perubahan_pdrb_provinsi_target": 1},
+        "_integ_target_pdrb_pulau": {
+            "initial": {"pdrb_pulau_awal": 1},
+            "step": {"perubahan_pdrb_pulau_target": 1},
         }
     },
 )
-def target_pdrb_provinsi():
-    return _integ_target_pdrb_provinsi()
+def target_pdrb_pulau():
+    return _integ_target_pdrb_pulau()
 
 
-_integ_target_pdrb_provinsi = Integ(
-    lambda: perubahan_pdrb_provinsi_target(),
-    lambda: pdrb_provinsi_awal(),
-    "_integ_target_pdrb_provinsi",
+_integ_target_pdrb_pulau = Integ(
+    lambda: perubahan_pdrb_pulau_target(),
+    lambda: pdrb_pulau_awal(),
+    "_integ_target_pdrb_pulau",
 )
 
 
@@ -9556,12 +9629,12 @@ def umur_kapital_rata2():
 
 
 @component.add(
-    name="Waktu meratakan PDRB provinsi",
+    name="Waktu meratakan PDRB Pulau",
     units="tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def waktu_meratakan_pdrb_provinsi():
+def waktu_meratakan_pdrb_pulau():
     return 0.5
 
 
@@ -9586,10 +9659,10 @@ def waktu_pemenuhan_investasi():
 
 
 @component.add(
-    name="Waktu Trend LPE Provinsi",
+    name="Waktu Trend LPE Pulau",
     units="tahun",
     comp_type="Constant",
     comp_subtype="Normal",
 )
-def waktu_trend_lpe_provinsi():
+def waktu_trend_lpe_pulau():
     return 1
