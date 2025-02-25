@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from pysd.py_backend.functions import if_then_else, step
-from pysd.py_backend.statefuls import Delay, Initial, Smooth, Integ, Trend
+from pysd.py_backend.statefuls import Smooth, Initial, Delay, Trend, Integ
 from pysd.py_backend.lookups import HardcodedLookups
 from pysd import Component
 
@@ -538,7 +538,7 @@ _smooth_perubahan_standard_kebutuhan_air_delay = Smooth(
 
 
 @component.add(
-    name="std kebutuhan air per kapita SK 146/2023 target",
+    name='"std kebutuhan air per kapita SK 146/2023 target"',
     units="m*m*m/(tahun*jiwa)",
     comp_type="Constant",
     comp_subtype="Normal",
@@ -1022,8 +1022,8 @@ def delay_on_change_elastisitas_lpe_thd_perubahan_teknologi():
     depends_on={
         "switch_perubahan_lahan_per_kapita": 1,
         "laju_perubahan_lahan_terbangun_per_kapita_historis_and_policy": 1,
-        "laju_pdrb_per_kapita": 1,
         "elasticity_pdrb_per_kapita_to_unit_lahan_terbangun": 1,
+        "laju_pdrb_per_kapita": 1,
         "lahan_terbangun_per_kapita": 1,
     },
 )
@@ -13065,11 +13065,11 @@ _delay_dampak_kualitas_air_industri_ekonomi_delay = Delay(
     comp_subtype="Normal",
     depends_on={
         "pdrb_pulau_awal": 1,
-        "intensitas_kapital": 2,
-        "kapital_awal": 1,
         "kapital": 1,
-        "tenaga_kerja": 1,
+        "kapital_awal": 1,
+        "intensitas_kapital": 2,
         "tenaga_kerja_awal": 1,
+        "tenaga_kerja": 1,
         "tingkat_teknologi": 1,
         "capacity_utilization_factor": 1,
         "dampak_kecukupan_air_industri_ekonomi": 1,
